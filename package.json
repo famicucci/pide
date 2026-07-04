@@ -7,7 +7,8 @@
     "build": "tsx scripts/migrate.ts && next build",
     "start": "next start",
     "migrate": "tsx scripts/migrate.ts",
-    "seed": "tsx scripts/seed.ts"
+    "seed": "tsx scripts/seed.ts",
+    "create-users": "tsx scripts/create-users.ts"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.17",
