@@ -67,9 +67,6 @@ export function Cart({ items, total, count, onUpdateQuantity, onUpdateNotes, onS
                       <Plus className="h-3 w-3" />
                     </button>
                   </div>
-                  <span className="text-sm font-semibold text-primary w-20 text-right">
-                    ${(item.product.price * item.quantity).toLocaleString("es-AR")}
-                  </span>
                 </div>
                 <Textarea
                   placeholder="Aclaraciones (sin sal, sin cebolla...)"
@@ -94,12 +91,6 @@ export function Cart({ items, total, count, onUpdateQuantity, onUpdateNotes, onS
         </div>
 
         <div className="p-4 border-t bg-white">
-          <div className="flex items-center justify-between mb-3">
-            <span className="font-semibold">Total</span>
-            <span className="font-bold text-lg text-primary">
-              ${total.toLocaleString("es-AR")}
-            </span>
-          </div>
           <Button
             className="w-full h-12 text-base"
             onClick={() => onSubmit(orderNotes)}
@@ -123,7 +114,7 @@ export function Cart({ items, total, count, onUpdateQuantity, onUpdateNotes, onS
             </span>
           </span>
           <span>Ver pedido</span>
-          <span className="font-bold">${total.toLocaleString("es-AR")}</span>
+          <span />
         </Button>
       </div>
     </>
