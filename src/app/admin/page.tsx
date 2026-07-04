@@ -19,7 +19,7 @@ export default async function AdminPage() {
   const [rows] = await db.execute<StatsRow[]>(`
     SELECT
       (SELECT COUNT(*) FROM orders WHERE DATE(created_at) = CURDATE()) AS total_orders,
-      (SELECT COUNT(*) FROM orders WHERE status IN ('pending','in_progress','ready')) AS pending_orders,
+      (SELECT COUNT(*) FROM orders WHERE status IN ('pending','ready')) AS pending_orders,
       (SELECT COUNT(*) FROM \`tables\` WHERE active = 1) AS active_tables,
       (SELECT COUNT(*) FROM products WHERE available = 1) AS total_products
   `);

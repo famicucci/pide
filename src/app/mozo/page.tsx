@@ -11,7 +11,6 @@ import { useRouter } from "next/navigation";
 
 const STATUS_LABEL: Record<string, string> = {
   pending: "Pendiente",
-  in_progress: "En preparación",
   ready: "Listo para entregar",
   delivered: "Entregado",
 };
@@ -27,7 +26,7 @@ function elapsed(createdAt: string): string {
 export default function MozoPage() {
   const router = useRouter();
   const { data: orders, loading, refetch } = usePolling<Order[]>(
-    "/api/orders?status=pending,in_progress,ready",
+    "/api/orders?status=pending,ready",
     { intervalMs: 8000 }
   );
 
@@ -87,8 +86,6 @@ export default function MozoPage() {
                     variant={
                       order.status === "ready"
                         ? "ready"
-                        : order.status === "in_progress"
-                        ? "in_progress"
                         : "pending"
                     }
                   >

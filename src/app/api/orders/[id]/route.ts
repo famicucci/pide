@@ -10,7 +10,7 @@ interface OrderRow extends RowDataPacket {
 }
 
 const patchSchema = z.object({
-  status: z.enum(["pending", "in_progress", "ready", "delivered", "cancelled"]),
+  status: z.enum(["pending", "ready", "delivered", "cancelled"]),
 });
 
 export async function PATCH(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {

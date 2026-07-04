@@ -1,6 +1,6 @@
 export type UserRole = "admin" | "waiter" | "kitchen";
 
-export type OrderStatus = "pending" | "in_progress" | "ready" | "delivered" | "cancelled";
+export type OrderStatus = "pending" | "ready" | "delivered" | "cancelled";
 
 export type ItemStatus = "pending" | "ready";
 
@@ -60,4 +60,10 @@ export interface CartItem {
   product: Product;
   quantity: number;
   notes: string;
+}
+
+export interface OpenTable {
+  id: number;
+  name: string;
+  total: number;
 }
