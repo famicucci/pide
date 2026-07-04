@@ -4,7 +4,7 @@ import { useState } from "react";
 import { CartItem } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ShoppingCart, Plus, Minus, X, ChevronUp } from "lucide-react";
+import { ShoppingCart, Plus, Minus, X, MessageSquare } from "lucide-react";
 
 interface Props {
   items: CartItem[];
@@ -14,6 +14,61 @@ interface Props {
   onUpdateNotes: (productId: number, notes: string) => void;
   onSubmit: (orderNotes: string) => Promise<void>;
   submitting: boolean;
+}
+
+function CartItemRow({
+  item,
+  onUpdateQuantity,
+  onUpdateNotes,
+}: {
+  item: CartItem;
+  onUpdateQuantity: (id: number, qty: number) => void;
+  onUpdateNotes: (id: number, notes: string) => void;
+}) {
+  const [expanded, setExpanded] = useState(!!item.notes);
+  const hasNote = item.notes.trim().length > 0;
+
+  return (
+    <div className="space-y-1.5">
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-sm font-medium flex-1 leading-tight">{item.product.name}</span>
+        <div className="flex items-center gap-1.5 shrink-0">
+          <button
+            onClick={() => setExpanded((v) => !v)}
+            className={`h-7 w-7 rounded-full flex items-center justify-center transition-colors ${
+              hasNote ? "text-primary" : "text-muted-foreground hover:text-foreground"
+            }`}
+            aria-label="Agregar aclaración"
+          >
+            <MessageSquare className="h-3.5 w-3.5" />
+          </button>
+          <button
+            onClick={() => onUpdateQuantity(item.product.id, item.quantity - 1)}
+            className="h-7 w-7 rounded-full border flex items-center justify-center"
+          >
+            <Minus className="h-3 w-3" />
+          </button>
+          <span className="w-5 text-center text-sm font-semibold">{item.quantity}</span>
+          <button
+            onClick={() => onUpdateQuantity(item.product.id, item.quantity + 1)}
+            className="h-7 w-7 rounded-full border flex items-center justify-center"
+          >
+            <Plus className="h-3 w-3" />
+          </button>
+        </div>
+      </div>
+      {expanded && (
+        <Textarea
+          autoFocus
+          placeholder="Aclaraciones (sin sal, sin cebolla...)"
+          value={item.notes}
+          onChange={(e) => onUpdateNotes(item.product.id, e.target.value)}
+          className="text-xs min-h-[36px] resize-none"
+          rows={1}
+        />
+      )}
+    </div>
+  );
 }
 
 export function Cart({ items, total, count, onUpdateQuantity, onUpdateNotes, onSubmit, submitting }: Props) {
@@ -47,44 +102,23 @@ export function Cart({ items, total, count, onUpdateQuantity, onUpdateNotes, onS
             </button>
           </div>
 
-          <div className="p-4 space-y-4">
+          <div className="p-4 space-y-3">
             {items.map((item) => (
-              <div key={item.product.id} className="space-y-2">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="text-sm font-medium flex-1">{item.product.name}</span>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => onUpdateQuantity(item.product.id, item.quantity - 1)}
-                      className="h-7 w-7 rounded-full border flex items-center justify-center"
-                    >
-                      <Minus className="h-3 w-3" />
-                    </button>
-                    <span className="w-5 text-center text-sm font-semibold">{item.quantity}</span>
-                    <button
-                      onClick={() => onUpdateQuantity(item.product.id, item.quantity + 1)}
-                      className="h-7 w-7 rounded-full border flex items-center justify-center"
-                    >
-                      <Plus className="h-3 w-3" />
-                    </button>
-                  </div>
-                </div>
-                <Textarea
-                  placeholder="Aclaraciones (sin sal, sin cebolla...)"
-                  value={item.notes}
-                  onChange={(e) => onUpdateNotes(item.product.id, e.target.value)}
-                  className="text-xs min-h-[40px] resize-none"
-                  rows={1}
-                />
-              </div>
+              <CartItemRow
+                key={item.product.id}
+                item={item}
+                onUpdateQuantity={onUpdateQuantity}
+                onUpdateNotes={onUpdateNotes}
+              />
             ))}
           </div>
 
           <div className="px-4 pb-2">
             <Textarea
-              placeholder="Comentarios del pedido (opcional)"
+              placeholder="Comentarios generales del pedido (opcional)"
               value={orderNotes}
               onChange={(e) => setOrderNotes(e.target.value)}
-              className="text-sm min-h-[60px] resize-none"
+              className="text-sm min-h-[56px] resize-none"
               rows={2}
             />
           </div>
