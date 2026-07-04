@@ -88,7 +88,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </div>
 
       {/* Main */}
-      <main className="flex-1 bg-muted/30 min-h-screen pt-14 md:pt-0">
+      <main className="flex-1 min-w-0 bg-muted/30 min-h-screen pt-14 md:pt-0">
         {children}
       </main>
     </div>
