@@ -99,7 +99,7 @@ export function MenuClient({ tableName, tableToken }: Props) {
                 <button
                   key={cat.id}
                   onClick={() => setActiveCategory(cat.id)}
-                  className={`shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                  className={`shrink-0 whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
                     activeCategory === cat.id
                       ? "bg-primary text-white"
                       : "bg-secondary text-secondary-foreground"

@@ -134,7 +134,7 @@ export default function MenuPage() {
       </div>
 
       {/* Mobile: category tabs */}
-      <div className="flex md:hidden overflow-x-auto gap-2 pb-3 mb-4 -mx-4 px-4">
+      <div className="flex md:hidden overflow-x-auto scrollbar-hide gap-2 pb-3 mb-4">
         {categories.map((cat) => (
           <button
             key={cat.id}
@@ -154,7 +154,7 @@ export default function MenuPage() {
         </button>
       </div>
 
-      <div className="flex gap-6">
+      <div className="md:flex md:gap-6">
         {/* Desktop: categories sidebar */}
         <div className="hidden md:block w-52 shrink-0">
           <div className="flex items-center justify-between mb-2">
@@ -187,7 +187,7 @@ export default function MenuPage() {
         </div>
 
         {/* Products */}
-        <div className="flex-1 min-w-0">
+        <div className="w-full md:flex-1 min-w-0">
           <div className="flex items-center justify-between mb-4">
             <span className="text-sm font-semibold text-muted-foreground">
               {categories.find((c) => c.id === activeCategory)?.name ?? ""}
