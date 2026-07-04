@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { LayoutDashboard, UtensilsCrossed, TableProperties, LogOut, Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Logo } from "@/components/ui/logo";
 
 const NAV = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
@@ -24,7 +25,7 @@ function NavLinks({ pathname, onNavigate }: { pathname: string; onNavigate?: () 
   return (
     <div className="flex flex-col h-full">
       <div className="px-5 py-4 border-b">
-        <span className="font-bold text-lg text-primary">🍺 Pide</span>
+        <Logo className="text-2xl" />
         <p className="text-xs text-muted-foreground">Admin</p>
       </div>
       <nav className="flex-1 py-3 space-y-1 px-2">
@@ -84,7 +85,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <NavLinks pathname={pathname} onNavigate={() => setOpen(false)} />
           </SheetContent>
         </Sheet>
-        <span className="font-bold text-primary">🍺 Pide</span>
+        <Logo className="text-xl" />
       </div>
 
       {/* Main */}

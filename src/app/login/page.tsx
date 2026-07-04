@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { LogoBadge } from "@/components/ui/logo";
 
 const ROLE_REDIRECT: Record<string, string> = {
   admin: "/admin",
@@ -45,9 +46,8 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-muted px-4">
       <Card className="w-full max-w-sm shadow-lg">
-        <CardHeader className="text-center pb-2">
-          <div className="text-4xl mb-2">🍺</div>
-          <CardTitle className="text-2xl">Pide</CardTitle>
+        <CardHeader className="text-center pb-2 items-center">
+          <LogoBadge className="w-24 text-xl mb-3" />
           <p className="text-sm text-muted-foreground">Acceso del personal</p>
         </CardHeader>
         <CardContent>

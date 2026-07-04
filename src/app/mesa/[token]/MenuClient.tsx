@@ -6,6 +6,7 @@ import { useCart } from "@/hooks/useCart";
 import { ProductCard } from "@/components/menu/ProductCard";
 import { Cart } from "@/components/menu/Cart";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Logo } from "@/components/ui/logo";
 import { CheckCircle } from "lucide-react";
 
 interface Props {
@@ -85,7 +86,7 @@ export function MenuClient({ tableName, tableToken }: Props) {
       {/* Header */}
       <header className="sticky top-0 z-10 bg-white border-b shadow-sm">
         <div className="px-4 py-3">
-          <h1 className="text-lg font-bold text-primary">🍺 Pide</h1>
+          <Logo className="text-2xl" />
           <p className="text-xs text-muted-foreground">{tableName}</p>
         </div>
 
