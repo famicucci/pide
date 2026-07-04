@@ -251,15 +251,22 @@ export default function MenuPage() {
           <div className="space-y-3">
             <div className="space-y-1">
               <Label>Categoría</Label>
-              <select
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                value={prodForm.category_id}
-                onChange={(e) => setProdForm((f) => ({ ...f, category_id: e.target.value }))}
-              >
-                {categories.filter((c) => c.active).map((c) => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
-                ))}
-              </select>
+              <div className="relative">
+                <select
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 pr-9 text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-ring focus:ring-inset"
+                  value={prodForm.category_id}
+                  onChange={(e) => setProdForm((f) => ({ ...f, category_id: e.target.value }))}
+                >
+                  {categories.filter((c) => c.active).map((c) => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
+                <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
+                  <svg className="h-4 w-4 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
             </div>
             <div className="space-y-1">
               <Label>Nombre</Label>
