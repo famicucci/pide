@@ -125,22 +125,43 @@ export default function MenuPage() {
 
   const filteredProducts = products.filter((p) => p.category_id === activeCategory);
 
-  if (loading) return <div className="p-8 text-muted-foreground">Cargando...</div>;
+  if (loading) return <div className="p-4 sm:p-8 text-muted-foreground">Cargando...</div>;
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-8">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Menú</h1>
       </div>
 
+      {/* Mobile: category tabs */}
+      <div className="flex md:hidden overflow-x-auto gap-2 pb-3 mb-4 -mx-4 px-4">
+        {categories.map((cat) => (
+          <button
+            key={cat.id}
+            onClick={() => setActiveCategory(cat.id)}
+            className={`shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+              activeCategory === cat.id ? "bg-primary text-white" : "bg-secondary text-secondary-foreground"
+            } ${!cat.active ? "opacity-50" : ""}`}
+          >
+            {cat.name}
+          </button>
+        ))}
+        <button
+          onClick={() => { setEditCat(null); setCatName(""); setCatDialog(true); }}
+          className="shrink-0 px-3 py-1.5 rounded-full text-sm font-medium border border-dashed text-muted-foreground"
+        >
+          + Cat.
+        </button>
+      </div>
+
       <div className="flex gap-6">
-        {/* Categories sidebar */}
-        <div className="w-52 shrink-0">
+        {/* Desktop: categories sidebar */}
+        <div className="hidden md:block w-52 shrink-0">
           <div className="flex items-center justify-between mb-2">
             <span className="text-sm font-semibold text-muted-foreground uppercase tracking-wide">Categorías</span>
-            <Button size="sm" variant="ghost" onClick={() => { setEditCat(null); setCatName(""); setCatDialog(true); }}>
+            <button onClick={() => { setEditCat(null); setCatName(""); setCatDialog(true); }} className="p-1 rounded hover:bg-muted">
               <Plus className="h-4 w-4" />
-            </Button>
+            </button>
           </div>
           <div className="space-y-1">
             {categories.map((cat) => (
@@ -166,28 +187,28 @@ export default function MenuPage() {
         </div>
 
         {/* Products */}
-        <div className="flex-1">
+        <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between mb-4">
             <span className="text-sm font-semibold text-muted-foreground">
               {categories.find((c) => c.id === activeCategory)?.name ?? ""}
             </span>
             <Button size="sm" onClick={() => openProductDialog()}>
-              <Plus className="h-4 w-4 mr-1" /> Agregar producto
+              <Plus className="h-4 w-4 mr-1" /> Agregar
             </Button>
           </div>
 
           <div className="space-y-2">
             {filteredProducts.map((prod) => (
-              <div key={prod.id} className={`border rounded-lg px-4 py-3 flex items-center justify-between gap-4 bg-white ${!prod.available ? "opacity-50" : ""}`}>
+              <div key={prod.id} className={`border rounded-lg px-3 py-3 flex items-center justify-between gap-3 bg-white ${!prod.available ? "opacity-50" : ""}`}>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
                     <span className="font-medium text-sm">{prod.name}</span>
                     {!prod.available && <Badge variant="secondary" className="text-xs">Oculto</Badge>}
                   </div>
                   {prod.description && <p className="text-xs text-muted-foreground truncate">{prod.description}</p>}
+                  <span className="font-semibold text-primary text-sm">${Number(prod.price).toLocaleString("es-AR")}</span>
                 </div>
-                <span className="font-semibold text-primary shrink-0">${Number(prod.price).toLocaleString("es-AR")}</span>
-                <div className="flex gap-2 shrink-0">
+                <div className="flex gap-1 shrink-0">
                   <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => openProductDialog(prod)}>
                     <Pencil className="h-3.5 w-3.5" />
                   </Button>

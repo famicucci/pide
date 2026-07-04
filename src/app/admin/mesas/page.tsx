@@ -82,10 +82,10 @@ export default function MesasPage() {
     win.document.close();
   }
 
-  if (loading) return <div className="p-8 text-muted-foreground">Cargando...</div>;
+  if (loading) return <div className="p-4 sm:p-8 text-muted-foreground">Cargando...</div>;
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-8">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold">Mesas</h1>
         <Button onClick={() => { setNewName(""); setCreateDialog(true); }}>
@@ -120,26 +120,22 @@ export default function MesasPage() {
               /mesa/{table.token.slice(0, 8)}...
             </p>
 
-            <div className="flex gap-2">
+            <div className="grid grid-cols-2 gap-2">
               <Button
                 size="sm"
                 variant="outline"
-                className="flex-1"
                 onClick={() => { setQrTable(table); }}
               >
                 <QrCode className="h-4 w-4 mr-1" /> Ver QR
               </Button>
-              <Button size="sm" variant="outline" className="flex-1" onClick={() => printQR(table)}>
+              <Button size="sm" variant="outline" onClick={() => printQR(table)}>
                 <Printer className="h-4 w-4 mr-1" /> Imprimir
               </Button>
-            </div>
-
-            <div className="flex gap-2">
-              <Button size="sm" variant="ghost" className="flex-1" onClick={() => toggleTable(table)}>
+              <Button size="sm" variant="ghost" onClick={() => toggleTable(table)}>
                 {table.active ? <EyeOff className="h-4 w-4 mr-1" /> : <Eye className="h-4 w-4 mr-1" />}
                 {table.active ? "Desactivar" : "Activar"}
               </Button>
-              <Button size="sm" variant="ghost" className="flex-1 text-destructive" onClick={() => resetTable(table)}>
+              <Button size="sm" variant="ghost" className="text-destructive" onClick={() => resetTable(table)}>
                 <RotateCcw className="h-4 w-4 mr-1" /> Resetear
               </Button>
             </div>
