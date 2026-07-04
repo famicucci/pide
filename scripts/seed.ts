@@ -5,6 +5,11 @@ import * as dotenv from "dotenv";
 
 dotenv.config({ path: ".env.local" });
 
+if (process.env.NODE_ENV === "production") {
+  console.error("❌ seed no puede ejecutarse en producción.");
+  process.exit(1);
+}
+
 async function seed() {
   const db = await mysql.createConnection({
     host: process.env.DB_HOST,
