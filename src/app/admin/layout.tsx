@@ -37,7 +37,7 @@ function NavLinks({ pathname, onNavigate }: { pathname: string; onNavigate?: () 
               href={item.href}
               onClick={onNavigate}
               className={cn(
-                "flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors",
+                  "flex items-center gap-3 px-3 py-3 rounded-md text-sm font-medium transition-colors",
                 active
                   ? "bg-primary text-white"
                   : "text-muted-foreground hover:bg-muted hover:text-foreground"
@@ -52,7 +52,7 @@ function NavLinks({ pathname, onNavigate }: { pathname: string; onNavigate?: () 
       <div className="p-3 border-t">
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 px-3 py-2 rounded-md text-sm text-muted-foreground hover:bg-muted hover:text-foreground w-full transition-colors"
+          className="flex items-center gap-3 px-3 py-3 rounded-md text-sm text-muted-foreground hover:bg-muted hover:text-foreground w-full transition-colors"
         >
           <LogOut className="h-4 w-4" />
           Cerrar sesión
@@ -77,7 +77,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <div className="md:hidden fixed top-0 left-0 right-0 z-40 flex items-center gap-3 px-4 py-3 bg-white border-b shadow-sm">
         <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger asChild>
-            <button className="text-muted-foreground hover:text-foreground">
+            <button className="p-2 -ml-2 text-muted-foreground hover:text-foreground">
               <Menu className="h-5 w-5" />
             </button>
           </SheetTrigger>

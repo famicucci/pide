@@ -76,7 +76,7 @@ export default function CocinaPage() {
           <UtensilsCrossed className="h-5 w-5 text-yellow-400" />
           <span className="font-bold text-lg">Barra</span>
         </div>
-        <button onClick={handleLogout} className="text-zinc-400 hover:text-white">
+        <button onClick={handleLogout} className="p-2 -mr-2 text-zinc-400 hover:text-white">
           <LogOut className="h-5 w-5" />
         </button>
       </header>
@@ -85,7 +85,7 @@ export default function CocinaPage() {
       <div className="flex border-b border-zinc-800">
         <button
           onClick={() => setTab("pedidos")}
-          className={`flex items-center gap-2 px-5 py-3 text-sm font-medium transition-colors ${
+          className={`flex items-center gap-2 px-5 py-3.5 text-base font-medium transition-colors ${
             tab === "pedidos"
               ? "border-b-2 border-yellow-400 text-yellow-400"
               : "text-zinc-400 hover:text-white"
@@ -101,7 +101,7 @@ export default function CocinaPage() {
         </button>
         <button
           onClick={() => setTab("mesas")}
-          className={`flex items-center gap-2 px-5 py-3 text-sm font-medium transition-colors ${
+          className={`flex items-center gap-2 px-5 py-3.5 text-base font-medium transition-colors ${
             tab === "mesas"
               ? "border-b-2 border-yellow-400 text-yellow-400"
               : "text-zinc-400 hover:text-white"

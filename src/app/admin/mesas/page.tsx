@@ -122,20 +122,19 @@ export default function MesasPage() {
 
             <div className="grid grid-cols-2 gap-2">
               <Button
-                size="sm"
                 variant="outline"
                 onClick={() => { setQrTable(table); }}
               >
                 <QrCode className="h-4 w-4 mr-1" /> Ver QR
               </Button>
-              <Button size="sm" variant="outline" onClick={() => printQR(table)}>
+              <Button variant="outline" onClick={() => printQR(table)}>
                 <Printer className="h-4 w-4 mr-1" /> Imprimir
               </Button>
-              <Button size="sm" variant="ghost" onClick={() => toggleTable(table)}>
+              <Button variant="ghost" onClick={() => toggleTable(table)}>
                 {table.active ? <EyeOff className="h-4 w-4 mr-1" /> : <Eye className="h-4 w-4 mr-1" />}
                 {table.active ? "Desactivar" : "Activar"}
               </Button>
-              <Button size="sm" variant="ghost" className="text-destructive" onClick={() => resetTable(table)}>
+              <Button variant="ghost" className="text-destructive" onClick={() => resetTable(table)}>
                 <RotateCcw className="h-4 w-4 mr-1" /> Resetear
               </Button>
             </div>

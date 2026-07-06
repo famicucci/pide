@@ -139,7 +139,7 @@ export default function MenuPage() {
           <button
             key={cat.id}
             onClick={() => setActiveCategory(cat.id)}
-            className={`shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+            className={`shrink-0 px-5 py-2.5 rounded-full text-sm font-medium transition-colors ${
               activeCategory === cat.id ? "bg-primary text-white" : "bg-secondary text-secondary-foreground"
             } ${!cat.active ? "opacity-50" : ""}`}
           >
@@ -148,7 +148,7 @@ export default function MenuPage() {
         ))}
         <button
           onClick={() => { setEditCat(null); setCatName(""); setCatDialog(true); }}
-          className="shrink-0 px-3 py-1.5 rounded-full text-sm font-medium border border-dashed text-muted-foreground"
+          className="shrink-0 px-4 py-2.5 rounded-full text-sm font-medium border border-dashed text-muted-foreground"
         >
           + Cat.
         </button>
@@ -209,11 +209,11 @@ export default function MenuPage() {
                   <span className="font-semibold text-primary text-sm">${Number(prod.price).toLocaleString("es-AR")}</span>
                 </div>
                 <div className="flex gap-1 shrink-0">
-                  <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => openProductDialog(prod)}>
-                    <Pencil className="h-3.5 w-3.5" />
+                  <Button size="icon" variant="ghost" className="h-10 w-10" onClick={() => openProductDialog(prod)}>
+                    <Pencil className="h-4 w-4" />
                   </Button>
-                  <Button size="icon" variant="ghost" className="h-8 w-8" onClick={() => toggleProduct(prod)}>
-                    {prod.available ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                  <Button size="icon" variant="ghost" className="h-10 w-10" onClick={() => toggleProduct(prod)}>
+                    {prod.available ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </Button>
                 </div>
               </div>

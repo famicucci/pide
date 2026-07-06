@@ -68,7 +68,7 @@ export function OrderCard({ order, onItemReady, onOrderReady }: Props) {
               <Button
                 size="sm"
                 variant="outline"
-                className="shrink-0 h-7 text-xs border-zinc-600 text-white hover:bg-zinc-700"
+                className="shrink-0 text-sm border-zinc-600 text-white hover:bg-zinc-700"
                 onClick={() => onItemReady(item.id)}
               >
                 Marcar listo

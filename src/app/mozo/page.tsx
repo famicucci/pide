@@ -60,7 +60,7 @@ export default function MozoPage() {
             </span>
           )}
         </div>
-        <button onClick={handleLogout} className="text-muted-foreground hover:text-foreground">
+        <button onClick={handleLogout} className="p-2 -mr-2 text-muted-foreground hover:text-foreground">
           <LogOut className="h-5 w-5" />
         </button>
       </header>

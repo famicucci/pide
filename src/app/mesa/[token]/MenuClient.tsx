@@ -71,7 +71,7 @@ export function MenuClient({ tableName, tableToken }: Props) {
         </p>
         <button
           onClick={() => setConfirmed(false)}
-          className="mt-4 text-primary underline text-sm"
+          className="mt-4 text-primary underline text-base"
         >
           Hacer otro pedido
         </button>
@@ -87,7 +87,7 @@ export function MenuClient({ tableName, tableToken }: Props) {
       <header className="sticky top-0 z-10 bg-white border-b shadow-sm">
         <div className="px-4 py-3">
           <Logo className="text-2xl" />
-          <p className="text-xs text-muted-foreground">{tableName}</p>
+          <p className="text-sm text-muted-foreground">{tableName}</p>
         </div>
 
         {/* Category tabs */}
@@ -100,7 +100,7 @@ export function MenuClient({ tableName, tableToken }: Props) {
                 <button
                   key={cat.id}
                   onClick={() => setActiveCategory(cat.id)}
-                  className={`shrink-0 whitespace-nowrap px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                  className={`shrink-0 whitespace-nowrap px-5 py-2.5 rounded-full text-base font-medium transition-colors ${
                     activeCategory === cat.id
                       ? "bg-primary text-white"
                       : "bg-secondary text-secondary-foreground"

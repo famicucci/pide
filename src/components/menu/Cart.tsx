@@ -29,31 +29,31 @@ function CartItemRow({
   const hasNote = item.notes.trim().length > 0;
 
   return (
-    <div className="space-y-1.5">
+    <div className="space-y-2">
       <div className="flex items-center justify-between gap-2">
-        <span className="text-sm font-medium flex-1 leading-tight">{item.product.name}</span>
+        <span className="text-base font-medium flex-1 leading-snug">{item.product.name}</span>
         <div className="flex items-center gap-1.5 shrink-0">
           <button
             onClick={() => setExpanded((v) => !v)}
-            className={`h-7 w-7 rounded-full flex items-center justify-center transition-colors ${
+            className={`h-9 w-9 rounded-full flex items-center justify-center transition-colors ${
               hasNote ? "text-primary" : "text-muted-foreground hover:text-foreground"
             }`}
             aria-label="Agregar aclaración"
           >
-            <MessageSquare className="h-3.5 w-3.5" />
+            <MessageSquare className="h-4 w-4" />
           </button>
           <button
             onClick={() => onUpdateQuantity(item.product.id, item.quantity - 1)}
-            className="h-7 w-7 rounded-full border flex items-center justify-center"
+            className="h-9 w-9 rounded-full border flex items-center justify-center"
           >
-            <Minus className="h-3 w-3" />
+            <Minus className="h-4 w-4" />
           </button>
-          <span className="w-5 text-center text-sm font-semibold">{item.quantity}</span>
+          <span className="w-6 text-center text-base font-semibold">{item.quantity}</span>
           <button
             onClick={() => onUpdateQuantity(item.product.id, item.quantity + 1)}
-            className="h-7 w-7 rounded-full border flex items-center justify-center"
+            className="h-9 w-9 rounded-full border flex items-center justify-center"
           >
-            <Plus className="h-3 w-3" />
+            <Plus className="h-4 w-4" />
           </button>
         </div>
       </div>
@@ -63,7 +63,7 @@ function CartItemRow({
           placeholder="Aclaraciones (sin sal, sin cebolla...)"
           value={item.notes}
           onChange={(e) => onUpdateNotes(item.product.id, e.target.value)}
-          className="text-xs min-h-[36px] resize-none"
+          className="text-sm min-h-[48px] resize-none"
           rows={1}
         />
       )}
@@ -96,8 +96,8 @@ export function Cart({ items, total, count, onUpdateQuantity, onUpdateNotes, onS
       >
         <div className="overflow-y-auto" style={{ maxHeight: "calc(80vh - 80px)" }}>
           <div className="p-4 border-b flex items-center justify-between">
-            <h2 className="font-semibold text-lg">Tu pedido</h2>
-            <button onClick={() => setOpen(false)} className="p-1">
+            <h2 className="font-semibold text-xl">Tu pedido</h2>
+            <button onClick={() => setOpen(false)} className="p-2 -mr-2">
               <X className="h-5 w-5 text-muted-foreground" />
             </button>
           </div>

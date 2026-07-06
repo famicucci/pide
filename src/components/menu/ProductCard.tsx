@@ -13,13 +13,13 @@ interface Props {
 
 export function ProductCard({ product, quantity, onAdd, onRemove }: Props) {
   return (
-    <div className="flex items-center justify-between gap-3 py-3 border-b last:border-0">
+    <div className="flex items-center justify-between gap-3 py-4 border-b last:border-0">
       <div className="flex-1 min-w-0">
-        <p className="font-medium text-sm leading-tight">{product.name}</p>
+        <p className="font-medium text-base leading-snug">{product.name}</p>
         {product.description && (
-          <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{product.description}</p>
+          <p className="text-sm text-muted-foreground mt-0.5 line-clamp-2">{product.description}</p>
         )}
-        <p className="text-sm font-semibold text-primary mt-1">
+        <p className="text-base font-semibold text-primary mt-1">
           ${product.price.toLocaleString("es-AR")}
         </p>
       </div>
@@ -30,22 +30,22 @@ export function ProductCard({ product, quantity, onAdd, onRemove }: Props) {
             <Button
               variant="outline"
               size="icon"
-              className="h-8 w-8 rounded-full"
+              className="h-10 w-10 rounded-full"
               onClick={onRemove}
               aria-label="Quitar uno"
             >
-              <Minus className="h-3 w-3" />
+              <Minus className="h-4 w-4" />
             </Button>
-            <span className="w-5 text-center font-semibold text-sm">{quantity}</span>
+            <span className="w-6 text-center font-semibold text-base">{quantity}</span>
           </>
         ) : null}
         <Button
           size="icon"
-          className="h-8 w-8 rounded-full"
+          className="h-10 w-10 rounded-full"
           onClick={onAdd}
           aria-label="Agregar"
         >
-          <Plus className="h-3 w-3" />
+          <Plus className="h-4 w-4" />
         </Button>
       </div>
     </div>
