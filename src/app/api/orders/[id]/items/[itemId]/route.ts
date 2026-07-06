@@ -52,7 +52,8 @@ export async function PATCH(
       "SELECT COUNT(*) AS total, SUM(status = 'ready') AS ready FROM order_items WHERE order_id = ?",
       [orderId]
     );
-    if (counts[0].total === counts[0].ready) {
+    // mysql2 returns COUNT(*) as a number but SUM(...) as a string, so coerce both
+    if (Number(counts[0].total) === Number(counts[0].ready)) {
       await db.execute("UPDATE orders SET status = 'ready' WHERE id = ? AND status != 'delivered'", [
         orderId,
       ]);
