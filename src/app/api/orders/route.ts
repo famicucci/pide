@@ -80,6 +80,12 @@ export async function GET(request: NextRequest) {
     params.push(Number(tableId));
   }
 
+  // Restrict to the table's current open session (orders since it was opened)
+  if (tableId && searchParams.get("session") === "current") {
+    query += " AND o.status != 'cancelled' AND o.created_at >= (SELECT opened_at FROM `tables` WHERE id = ?)";
+    params.push(Number(tableId));
+  }
+
   query += " ORDER BY o.created_at ASC, oi.id ASC";
 
   const [rows] = await db.execute<OrderRow[]>(query, params);
@@ -171,8 +177,13 @@ export async function POST(request: NextRequest) {
     );
     const orderId = orderResult.insertId;
 
-    // Mark table as open when it receives its first order of the session
-    await conn.execute("UPDATE `tables` SET is_open = 1 WHERE id = ?", [table.id]);
+    // Open the table on its first order of a new session.
+    // opened_at is stamped only when the table was closed; assignment order
+    // matters in MySQL (opened_at is evaluated before is_open is updated).
+    await conn.execute(
+      "UPDATE `tables` SET opened_at = IF(is_open = 0, NOW(), opened_at), is_open = 1 WHERE id = ?",
+      [table.id]
+    );
 
     for (const item of items) {
       await conn.execute(

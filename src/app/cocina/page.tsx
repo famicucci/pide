@@ -25,7 +25,7 @@ function TableCard({
   async function toggleDetail() {
     if (!expanded && orders === null) {
       setLoading(true);
-      const res = await fetch(`/api/orders?status=pending,ready&table_id=${table.id}`);
+      const res = await fetch(`/api/orders?table_id=${table.id}&session=current`);
       const data = await res.json();
       setOrders(data);
       setLoading(false);

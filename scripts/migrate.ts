@@ -10,11 +10,13 @@ const statements = [
     \`token\` VARCHAR(64) NOT NULL UNIQUE,
     \`active\` TINYINT(1) NOT NULL DEFAULT 1,
     \`is_open\` TINYINT(1) NOT NULL DEFAULT 0,
+    \`opened_at\` TIMESTAMP NULL DEFAULT NULL,
     \`created_at\` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
-  // Add is_open to existing tables (idempotent — fails silently if column already exists)
+  // Add new columns to existing tables (idempotent)
   `ALTER TABLE \`tables\` ADD COLUMN IF NOT EXISTS \`is_open\` TINYINT(1) NOT NULL DEFAULT 0`,
+  `ALTER TABLE \`tables\` ADD COLUMN IF NOT EXISTS \`opened_at\` TIMESTAMP NULL DEFAULT NULL`,
 
   `CREATE TABLE IF NOT EXISTS \`categories\` (
     \`id\` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,

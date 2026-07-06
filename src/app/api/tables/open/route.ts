@@ -23,6 +23,7 @@ export async function GET() {
         JOIN order_items oi ON oi.order_id = o2.id
         WHERE o2.table_id = t.id
           AND o2.status NOT IN ('cancelled')
+          AND o2.created_at >= t.opened_at
       ), 0) AS total
     FROM \`tables\` t
     WHERE t.is_open = 1
