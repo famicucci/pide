@@ -11,12 +11,14 @@ const statements = [
     \`active\` TINYINT(1) NOT NULL DEFAULT 1,
     \`is_open\` TINYINT(1) NOT NULL DEFAULT 0,
     \`opened_at\` TIMESTAMP NULL DEFAULT NULL,
+    \`session_key\` VARCHAR(100) NULL DEFAULT NULL,
     \`created_at\` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
   // Add new columns to existing tables (idempotent)
   `ALTER TABLE \`tables\` ADD COLUMN IF NOT EXISTS \`is_open\` TINYINT(1) NOT NULL DEFAULT 0`,
   `ALTER TABLE \`tables\` ADD COLUMN IF NOT EXISTS \`opened_at\` TIMESTAMP NULL DEFAULT NULL`,
+  `ALTER TABLE \`tables\` ADD COLUMN IF NOT EXISTS \`session_key\` VARCHAR(100) NULL DEFAULT NULL`,
 
   `CREATE TABLE IF NOT EXISTS \`categories\` (
     \`id\` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,

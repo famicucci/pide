@@ -17,8 +17,11 @@ export async function POST(_: NextRequest, { params }: { params: Promise<{ id: s
       "UPDATE orders SET status = 'delivered' WHERE table_id = ? AND status IN ('pending', 'ready')",
       [tableId]
     );
-    // Close the table
-    await conn.execute("UPDATE `tables` SET is_open = 0 WHERE id = ?", [tableId]);
+    // Close the table and clear the session key so the next group must set a new one
+    await conn.execute(
+      "UPDATE `tables` SET is_open = 0, session_key = NULL WHERE id = ?",
+      [tableId]
+    );
     await conn.commit();
   } catch (err) {
     await conn.rollback();

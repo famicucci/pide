@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import db from "@/lib/db";
 import { RowDataPacket } from "mysql2";
-import { MenuClient } from "./MenuClient";
+import { SessionGate } from "./SessionGate";
 
 interface TableRow extends RowDataPacket {
   id: number;
@@ -25,5 +25,5 @@ export default async function MesaPage({ params }: Props) {
 
   const table = rows[0];
 
-  return <MenuClient tableId={table.id} tableName={table.name} tableToken={table.token} />;
+  return <SessionGate tableId={table.id} tableName={table.name} tableToken={table.token} />;
 }
