@@ -12,4 +12,11 @@ const pool = mysql.createPool({
   timezone: "Z",
 });
 
+// Force UTC timezone on every new connection so timestamps
+// are always returned in UTC regardless of the DB server's local timezone.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+(pool as any).pool.on("connection", (conn: any) => {
+  conn.query("SET time_zone = '+00:00'");
+});
+
 export default pool;
