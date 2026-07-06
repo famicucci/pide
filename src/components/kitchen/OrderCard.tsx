@@ -8,7 +8,7 @@ import { CheckCheck } from "lucide-react";
 interface Props {
   order: Order;
   onItemReady: (itemId: number) => void;
-  onOrderReady: (orderId: number) => void;
+  onOrderReady?: (orderId: number) => void;
 }
 
 function elapsed(createdAt: string): string {
@@ -86,13 +86,10 @@ export function OrderCard({ order, onItemReady, onOrderReady }: Props) {
 
       {/* Mark all ready */}
       {allReady && (
-        <Button
-          className="w-full bg-green-600 hover:bg-green-700 text-white"
-          onClick={() => onOrderReady(order.id)}
-        >
-          <CheckCheck className="h-4 w-4 mr-2" />
-          Pedido completo
-        </Button>
+        <div className="flex items-center justify-center gap-2 py-2 text-green-600 font-medium text-sm">
+          <CheckCheck className="h-4 w-4" />
+          Todo listo — esperando al mozo
+        </div>
       )}
     </div>
   );

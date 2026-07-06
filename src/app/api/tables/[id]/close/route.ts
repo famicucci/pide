@@ -7,10 +7,25 @@ export async function POST(_: NextRequest, { params }: { params: Promise<{ id: s
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id } = await params;
-  await db.execute(
-    "UPDATE orders SET status = 'delivered' WHERE table_id = ? AND status IN ('pending', 'ready')",
-    [Number(id)]
-  );
+  const tableId = Number(id);
+
+  const conn = await db.getConnection();
+  try {
+    await conn.beginTransaction();
+    // Mark any still-pending/ready orders as delivered
+    await conn.execute(
+      "UPDATE orders SET status = 'delivered' WHERE table_id = ? AND status IN ('pending', 'ready')",
+      [tableId]
+    );
+    // Close the table
+    await conn.execute("UPDATE `tables` SET is_open = 0 WHERE id = ?", [tableId]);
+    await conn.commit();
+  } catch (err) {
+    await conn.rollback();
+    throw err;
+  } finally {
+    conn.release();
+  }
 
   return NextResponse.json({ ok: true });
 }

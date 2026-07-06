@@ -171,6 +171,9 @@ export async function POST(request: NextRequest) {
     );
     const orderId = orderResult.insertId;
 
+    // Mark table as open when it receives its first order of the session
+    await conn.execute("UPDATE `tables` SET is_open = 1 WHERE id = ?", [table.id]);
+
     for (const item of items) {
       await conn.execute(
         "INSERT INTO order_items (order_id, product_id, quantity, unit_price, notes) VALUES (?, ?, ?, ?, ?)",

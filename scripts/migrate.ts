@@ -9,8 +9,12 @@ const statements = [
     \`name\` VARCHAR(50) NOT NULL,
     \`token\` VARCHAR(64) NOT NULL UNIQUE,
     \`active\` TINYINT(1) NOT NULL DEFAULT 1,
+    \`is_open\` TINYINT(1) NOT NULL DEFAULT 0,
     \`created_at\` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+  // Add is_open to existing tables (idempotent — fails silently if column already exists)
+  `ALTER TABLE \`tables\` ADD COLUMN IF NOT EXISTS \`is_open\` TINYINT(1) NOT NULL DEFAULT 0`,
 
   `CREATE TABLE IF NOT EXISTS \`categories\` (
     \`id\` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
@@ -78,7 +82,9 @@ async function migrate() {
   console.log("Running migrations...");
 
   for (const sql of statements) {
-    const tableName = sql.match(/CREATE TABLE IF NOT EXISTS `(\w+)`/)?.[1] ?? "?";
+    const tableName = sql.match(/CREATE TABLE IF NOT EXISTS `(\w+)`/)?.[1]
+      ?? sql.match(/ALTER TABLE `(\w+)`/)?.[1]
+      ?? "?";
     await db.execute(sql);
     console.log(`  ✓ ${tableName}`);
   }
