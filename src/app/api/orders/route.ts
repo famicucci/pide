@@ -171,19 +171,21 @@ export async function POST(request: NextRequest) {
   try {
     await conn.beginTransaction();
 
-    const [orderResult] = await conn.execute<ResultSetHeader>(
-      "INSERT INTO orders (table_id, status, notes) VALUES (?, 'pending', ?)",
-      [table.id, notes || null]
-    );
-    const orderId = orderResult.insertId;
-
-    // Open the table on its first order of a new session.
+    // Open the table on its first order of a new session BEFORE inserting the
+    // order, so opened_at is always <= every order's created_at in the session
+    // (otherwise a second-boundary crossing could exclude the opening order).
     // opened_at is stamped only when the table was closed; assignment order
     // matters in MySQL (opened_at is evaluated before is_open is updated).
     await conn.execute(
       "UPDATE `tables` SET opened_at = IF(is_open = 0, NOW(), opened_at), is_open = 1 WHERE id = ?",
       [table.id]
     );
+
+    const [orderResult] = await conn.execute<ResultSetHeader>(
+      "INSERT INTO orders (table_id, status, notes) VALUES (?, 'pending', ?)",
+      [table.id, notes || null]
+    );
+    const orderId = orderResult.insertId;
 
     for (const item of items) {
       await conn.execute(
