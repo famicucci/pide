@@ -12,8 +12,30 @@ interface Props {
   tableToken: string;
 }
 
+interface StoredSession {
+  name: string;
+  sessionId: string;
+}
+
 function storageKey(token: string) {
   return `mesa-session-${token}`;
+}
+
+function getStored(token: string): StoredSession | null {
+  try {
+    const raw = sessionStorage.getItem(storageKey(token));
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveStored(token: string, session: StoredSession) {
+  sessionStorage.setItem(storageKey(token), JSON.stringify(session));
+}
+
+function clearStored(token: string) {
+  sessionStorage.removeItem(storageKey(token));
 }
 
 type State = "loading" | "gate" | "verified";
@@ -27,26 +49,25 @@ export function SessionGate({ tableId, tableName, tableToken }: Props) {
 
   useEffect(() => {
     async function check() {
-      // First: is there a stored session name?
-      const stored = sessionStorage.getItem(storageKey(tableToken));
+      const stored = getStored(tableToken);
 
       if (stored) {
-        // Re-validate against the server (table may have been closed and reopened)
-        const res = await fetch(`/api/tables/${tableToken}/session`, {
+        // Re-validate: send both name and sessionId
+        // If the table was closed and reopened with the same name, the sessionId will differ → 403
+        const res = await fetch(`/api/mesa/${tableToken}/session`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ name: stored }),
+          body: JSON.stringify({ name: stored.name, sessionId: stored.sessionId }),
         });
         if (res.ok) {
           setState("verified");
           return;
         }
-        // No longer valid — clear and show gate
-        sessionStorage.removeItem(storageKey(tableToken));
+        clearStored(tableToken);
       }
 
-      // Check if table is open or closed to show the right message
-      const statusRes = await fetch(`/api/tables/${tableToken}/status`);
+      // Check if table is open or closed to show the right prompt
+      const statusRes = await fetch(`/api/mesa/${tableToken}/status`);
       if (statusRes.ok) {
         const data = await statusRes.json();
         setTableOpen(data.is_open === 1);
@@ -64,7 +85,7 @@ export function SessionGate({ tableId, tableName, tableToken }: Props) {
     setSubmitting(true);
     setError("");
 
-    const res = await fetch(`/api/tables/${tableToken}/session`, {
+    const res = await fetch(`/api/mesa/${tableToken}/session`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name: name.trim() }),
@@ -73,7 +94,8 @@ export function SessionGate({ tableId, tableName, tableToken }: Props) {
     setSubmitting(false);
 
     if (res.ok) {
-      sessionStorage.setItem(storageKey(tableToken), name.trim().toLowerCase());
+      const data = await res.json();
+      saveStored(tableToken, { name: name.trim().toLowerCase(), sessionId: data.sessionId });
       setState("verified");
     } else {
       setError("Nombre incorrecto. Preguntale a quien abrió la mesa.");
