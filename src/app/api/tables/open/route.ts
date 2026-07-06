@@ -22,15 +22,13 @@ export async function GET() {
         FROM orders o2
         JOIN order_items oi ON oi.order_id = o2.id
         WHERE o2.table_id = t.id
-          AND o2.status NOT IN ('cancelled')
-          AND DATE(o2.created_at) = CURDATE()
+          AND o2.status IN ('pending', 'ready')
       ), 0) AS total
     FROM \`tables\` t
     WHERE EXISTS (
       SELECT 1 FROM orders o
       WHERE o.table_id = t.id
         AND o.status IN ('pending', 'ready')
-        AND DATE(o.created_at) = CURDATE()
     )
     ORDER BY t.name ASC
   `);

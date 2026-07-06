@@ -69,32 +69,32 @@ export default function CocinaPage() {
   const openTablesCount = openTables?.length ?? 0;
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-white">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="flex items-center justify-between px-4 py-3 border-b border-zinc-800">
+      <header className="sticky top-0 z-10 flex items-center justify-between px-4 py-3 border-b bg-white shadow-sm">
         <div className="flex items-center gap-2">
-          <UtensilsCrossed className="h-5 w-5 text-yellow-400" />
-          <span className="font-bold text-lg">Barra</span>
+          <UtensilsCrossed className="h-5 w-5 text-primary" />
+          <span className="font-bold text-lg">Barra / Cocina</span>
         </div>
-        <button onClick={handleLogout} className="p-2 -mr-2 text-zinc-400 hover:text-white">
+        <button onClick={handleLogout} className="p-2 -mr-2 text-muted-foreground hover:text-foreground">
           <LogOut className="h-5 w-5" />
         </button>
       </header>
 
       {/* Tabs */}
-      <div className="flex border-b border-zinc-800">
+      <div className="flex border-b bg-white">
         <button
           onClick={() => setTab("pedidos")}
           className={`flex items-center gap-2 px-5 py-3.5 text-base font-medium transition-colors ${
             tab === "pedidos"
-              ? "border-b-2 border-yellow-400 text-yellow-400"
-              : "text-zinc-400 hover:text-white"
+              ? "border-b-2 border-primary text-primary"
+              : "text-muted-foreground hover:text-foreground"
           }`}
         >
           <UtensilsCrossed className="h-4 w-4" />
           Pedidos
           {pendingCount > 0 && (
-            <span className="bg-yellow-400 text-black text-xs font-bold rounded-full px-1.5 py-0.5 leading-none">
+            <span className="bg-primary text-white text-xs font-bold rounded-full px-1.5 py-0.5 leading-none">
               {pendingCount}
             </span>
           )}
@@ -103,14 +103,14 @@ export default function CocinaPage() {
           onClick={() => setTab("mesas")}
           className={`flex items-center gap-2 px-5 py-3.5 text-base font-medium transition-colors ${
             tab === "mesas"
-              ? "border-b-2 border-yellow-400 text-yellow-400"
-              : "text-zinc-400 hover:text-white"
+              ? "border-b-2 border-primary text-primary"
+              : "text-muted-foreground hover:text-foreground"
           }`}
         >
           <LayoutGrid className="h-4 w-4" />
           Mesas
           {openTablesCount > 0 && (
-            <span className="bg-zinc-600 text-white text-xs font-bold rounded-full px-1.5 py-0.5 leading-none">
+            <span className="bg-muted text-foreground text-xs font-bold rounded-full px-1.5 py-0.5 leading-none">
               {openTablesCount}
             </span>
           )}
@@ -119,11 +119,11 @@ export default function CocinaPage() {
 
       {/* Pedidos tab */}
       {tab === "pedidos" && (
-        <main className="p-4">
+        <main className="p-4 bg-muted/30 min-h-[calc(100vh-112px)]">
           {loadingOrders ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {Array.from({ length: 3 }).map((_, i) => (
-                <Skeleton key={i} className="h-48 bg-zinc-800 rounded-xl" />
+                <Skeleton key={i} className="h-48 rounded-xl" />
               ))}
             </div>
           ) : orders && orders.length > 0 ? (
@@ -138,7 +138,7 @@ export default function CocinaPage() {
               ))}
             </div>
           ) : (
-            <div className="flex flex-col items-center justify-center h-64 text-zinc-500 gap-2">
+            <div className="flex flex-col items-center justify-center h-64 text-muted-foreground gap-2">
               <UtensilsCrossed className="h-10 w-10" />
               <p>Sin pedidos pendientes</p>
             </div>
@@ -151,19 +151,19 @@ export default function CocinaPage() {
         <main className="p-4 max-w-2xl mx-auto space-y-3">
           {loadingTables ? (
             Array.from({ length: 3 }).map((_, i) => (
-              <Skeleton key={i} className="h-24 bg-zinc-800 rounded-xl" />
+              <Skeleton key={i} className="h-24 rounded-xl" />
             ))
           ) : openTables && openTables.length > 0 ? (
             openTables.map((table) => (
               <div
                 key={table.id}
-                className="border border-zinc-700 rounded-xl bg-zinc-900 p-4 flex items-center justify-between gap-4"
+                className="border rounded-xl bg-white p-4 flex items-center justify-between gap-4 shadow-sm"
               >
                 <div>
-                  <p className="font-bold text-white text-lg">{table.name}</p>
-                  <p className="text-zinc-400 text-sm mt-0.5">
+                  <p className="font-bold text-lg">{table.name}</p>
+                  <p className="text-muted-foreground text-sm mt-0.5">
                     Total:{" "}
-                    <span className="text-white font-semibold">
+                    <span className="text-foreground font-semibold">
                       ${table.total.toLocaleString("es-AR", { minimumFractionDigits: 2 })}
                     </span>
                   </p>
@@ -179,7 +179,7 @@ export default function CocinaPage() {
               </div>
             ))
           ) : (
-            <div className="flex flex-col items-center justify-center h-64 text-zinc-500 gap-2">
+            <div className="flex flex-col items-center justify-center h-64 text-muted-foreground gap-2">
               <LayoutGrid className="h-10 w-10" />
               <p>No hay mesas con pedidos activos</p>
             </div>
