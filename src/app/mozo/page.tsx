@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { usePolling } from "@/hooks/usePolling";
 import { Order } from "@/types";
 import { Badge } from "@/components/ui/badge";
@@ -29,13 +29,20 @@ export default function MozoPage() {
     "/api/orders?status=pending,ready",
     { intervalMs: 8000 }
   );
+  const [deliveringIds, setDeliveringIds] = useState<Set<number>>(new Set());
 
   const handleDeliver = useCallback(
     async (orderId: number) => {
+      setDeliveringIds((prev) => new Set(prev).add(orderId));
       await fetch(`/api/orders/${orderId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: "delivered" }),
+      });
+      setDeliveringIds((prev) => {
+        const next = new Set(prev);
+        next.delete(orderId);
+        return next;
       });
       refetch();
     },
@@ -124,9 +131,10 @@ export default function MozoPage() {
                 <Button
                   className="w-full"
                   onClick={() => handleDeliver(order.id)}
+                  disabled={deliveringIds.has(order.id)}
                 >
                   <CheckCircle2 className="h-4 w-4 mr-2" />
-                  Marcar como entregado
+                  {deliveringIds.has(order.id) ? "Marcando..." : "Marcar como entregado"}
                 </Button>
               )}
             </div>

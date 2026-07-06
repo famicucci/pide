@@ -24,11 +24,15 @@ export default function MenuPage() {
   const [catDialog, setCatDialog] = useState(false);
   const [catName, setCatName] = useState("");
   const [editCat, setEditCat] = useState<Category | null>(null);
+  const [savingCat, setSavingCat] = useState(false);
+  const [togglingCatIds, setTogglingCatIds] = useState<Set<number>>(new Set());
 
   // Product dialog
   const [prodDialog, setProdDialog] = useState(false);
   const [editProd, setEditProd] = useState<ProductWithCategory | null>(null);
   const [prodForm, setProdForm] = useState({ name: "", description: "", price: "", category_id: "" });
+  const [savingProd, setSavingProd] = useState(false);
+  const [togglingProdIds, setTogglingProdIds] = useState<Set<number>>(new Set());
 
   const loadData = useCallback(async () => {
     const [catRes, prodRes] = await Promise.all([
@@ -45,6 +49,7 @@ export default function MenuPage() {
 
   // Category CRUD
   async function saveCategory() {
+    setSavingCat(true);
     if (editCat) {
       await fetch(`/api/categories/${editCat.id}`, {
         method: "PUT",
@@ -58,6 +63,7 @@ export default function MenuPage() {
         body: JSON.stringify({ name: catName }),
       });
     }
+    setSavingCat(false);
     setCatDialog(false);
     setCatName("");
     setEditCat(null);
@@ -65,11 +71,13 @@ export default function MenuPage() {
   }
 
   async function toggleCategory(cat: Category) {
+    setTogglingCatIds((prev) => new Set(prev).add(cat.id));
     await fetch(`/api/categories/${cat.id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ active: !cat.active }),
     });
+    setTogglingCatIds((prev) => { const next = new Set(prev); next.delete(cat.id); return next; });
     loadData();
   }
 
@@ -91,6 +99,7 @@ export default function MenuPage() {
   }
 
   async function saveProduct() {
+    setSavingProd(true);
     const payload = {
       name: prodForm.name,
       description: prodForm.description,
@@ -110,16 +119,19 @@ export default function MenuPage() {
         body: JSON.stringify(payload),
       });
     }
+    setSavingProd(false);
     setProdDialog(false);
     loadData();
   }
 
   async function toggleProduct(prod: ProductWithCategory) {
+    setTogglingProdIds((prev) => new Set(prev).add(prod.id));
     await fetch(`/api/products/${prod.id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ available: !prod.available }),
     });
+    setTogglingProdIds((prev) => { const next = new Set(prev); next.delete(prod.id); return next; });
     loadData();
   }
 
@@ -177,7 +189,7 @@ export default function MenuPage() {
                   <button onClick={() => { setEditCat(cat); setCatName(cat.name); setCatDialog(true); }}>
                     <Pencil className="h-3 w-3" />
                   </button>
-                  <button onClick={() => toggleCategory(cat)}>
+                  <button onClick={() => toggleCategory(cat)} disabled={togglingCatIds.has(cat.id)}>
                     {cat.active ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
                   </button>
                 </div>
@@ -212,7 +224,7 @@ export default function MenuPage() {
                   <Button size="icon" variant="ghost" className="h-10 w-10" onClick={() => openProductDialog(prod)}>
                     <Pencil className="h-4 w-4" />
                   </Button>
-                  <Button size="icon" variant="ghost" className="h-10 w-10" onClick={() => toggleProduct(prod)}>
+                  <Button size="icon" variant="ghost" className="h-10 w-10" onClick={() => toggleProduct(prod)} disabled={togglingProdIds.has(prod.id)}>
                     {prod.available ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </Button>
                 </div>
@@ -236,8 +248,10 @@ export default function MenuPage() {
             <Input value={catName} onChange={(e) => setCatName(e.target.value)} placeholder="Bebidas, Comidas..." />
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setCatDialog(false)}>Cancelar</Button>
-            <Button onClick={saveCategory} disabled={!catName.trim()}>Guardar</Button>
+            <Button variant="outline" onClick={() => setCatDialog(false)} disabled={savingCat}>Cancelar</Button>
+            <Button onClick={saveCategory} disabled={!catName.trim() || savingCat}>
+              {savingCat ? "Guardando..." : "Guardar"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -293,8 +307,10 @@ export default function MenuPage() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setProdDialog(false)}>Cancelar</Button>
-            <Button onClick={saveProduct} disabled={!prodForm.name.trim() || !prodForm.price}>Guardar</Button>
+            <Button variant="outline" onClick={() => setProdDialog(false)} disabled={savingProd}>Cancelar</Button>
+            <Button onClick={saveProduct} disabled={!prodForm.name.trim() || !prodForm.price || savingProd}>
+              {savingProd ? "Guardando..." : "Guardar"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

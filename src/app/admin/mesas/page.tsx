@@ -16,6 +16,8 @@ export default function MesasPage() {
   const [newName, setNewName] = useState("");
   const [qrTable, setQrTable] = useState<Table | null>(null);
   const [creating, setCreating] = useState(false);
+  const [togglingIds, setTogglingIds] = useState<Set<number>>(new Set());
+  const [resettingIds, setResettingIds] = useState<Set<number>>(new Set());
 
   const loadTables = useCallback(async () => {
     const res = await fetch("/api/tables");
@@ -40,17 +42,21 @@ export default function MesasPage() {
   }
 
   async function toggleTable(table: Table) {
+    setTogglingIds((prev) => new Set(prev).add(table.id));
     await fetch(`/api/tables/${table.id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ active: !table.active }),
     });
+    setTogglingIds((prev) => { const next = new Set(prev); next.delete(table.id); return next; });
     loadTables();
   }
 
   async function resetTable(table: Table) {
     if (!confirm(`¿Cancelar todos los pedidos activos de ${table.name}?`)) return;
+    setResettingIds((prev) => new Set(prev).add(table.id));
     await fetch(`/api/tables/${table.id}/reset`, { method: "POST" });
+    setResettingIds((prev) => { const next = new Set(prev); next.delete(table.id); return next; });
   }
 
   function printQR(table: Table) {
@@ -130,12 +136,13 @@ export default function MesasPage() {
               <Button variant="outline" onClick={() => printQR(table)}>
                 <Printer className="h-4 w-4 mr-1" /> Imprimir
               </Button>
-              <Button variant="ghost" onClick={() => toggleTable(table)}>
+              <Button variant="ghost" onClick={() => toggleTable(table)} disabled={togglingIds.has(table.id)}>
                 {table.active ? <EyeOff className="h-4 w-4 mr-1" /> : <Eye className="h-4 w-4 mr-1" />}
-                {table.active ? "Desactivar" : "Activar"}
+                {togglingIds.has(table.id) ? "..." : table.active ? "Desactivar" : "Activar"}
               </Button>
-              <Button variant="ghost" className="text-destructive" onClick={() => resetTable(table)}>
-                <RotateCcw className="h-4 w-4 mr-1" /> Resetear
+              <Button variant="ghost" className="text-destructive" onClick={() => resetTable(table)} disabled={resettingIds.has(table.id)}>
+                <RotateCcw className="h-4 w-4 mr-1" />
+                {resettingIds.has(table.id) ? "Reseteando..." : "Resetear"}
               </Button>
             </div>
           </div>

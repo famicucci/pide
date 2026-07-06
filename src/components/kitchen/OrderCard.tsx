@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Order, OrderItem } from "@/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -7,7 +8,7 @@ import { CheckCheck } from "lucide-react";
 
 interface Props {
   order: Order;
-  onItemReady: (itemId: number) => void;
+  onItemReady: (itemId: number) => Promise<void>;
   onOrderReady?: (orderId: number) => void;
 }
 
@@ -21,6 +22,17 @@ function elapsed(createdAt: string): string {
 
 export function OrderCard({ order, onItemReady, onOrderReady }: Props) {
   const allReady = order.items?.every((i) => i.status === "ready") ?? false;
+  const [loadingItems, setLoadingItems] = useState<Set<number>>(new Set());
+
+  async function handleItemReady(itemId: number) {
+    setLoadingItems((prev) => new Set(prev).add(itemId));
+    await onItemReady(itemId);
+    setLoadingItems((prev) => {
+      const next = new Set(prev);
+      next.delete(itemId);
+      return next;
+    });
+  }
 
   return (
     <div
@@ -75,16 +87,17 @@ export function OrderCard({ order, onItemReady, onOrderReady }: Props) {
                 size="sm"
                 variant="outline"
                 className="shrink-0 text-sm"
-                onClick={() => onItemReady(item.id)}
+                disabled={loadingItems.has(item.id)}
+                onClick={() => handleItemReady(item.id)}
               >
-                Marcar listo
+                {loadingItems.has(item.id) ? "Guardando..." : "Marcar listo"}
               </Button>
             )}
           </div>
         ))}
       </div>
 
-      {/* Mark all ready */}
+      {/* All ready indicator */}
       {allReady && (
         <div className="flex items-center justify-center gap-2 py-2 text-green-600 font-medium text-sm">
           <CheckCheck className="h-4 w-4" />
