@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pide — Pedidos por QR para tu bar</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --amber: #f59e0b;
+      --amber-light: #fde68a;
+      --dark: #111827;
+      --gray: #6b7280;
+      --light: #f9fafb;
+      --white: #ffffff;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--white);
+      color: var(--dark);
+      line-height: 1.6;
+    }
+
+    /* NAV */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.25rem 2rem;
+      border-bottom: 1px solid #e5e7eb;
+    }
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: var(--dark);
+    }
+    .logo span { color: var(--amber); }
+
+    /* HERO */
+    .hero {
+      text-align: center;
+      padding: 5rem 1.5rem 4rem;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    .badge {
+      display: inline-block;
+      background: var(--amber-light);
+      color: #92400e;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      padding: 0.3rem 0.9rem;
+      border-radius: 999px;
+      margin-bottom: 1.5rem;
+    }
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -0.5px;
+      margin-bottom: 1.25rem;
+    }
+    .hero h1 em {
+      font-style: normal;
+      color: var(--amber);
+    }
+    .hero p {
+      font-size: 1.15rem;
+      color: var(--gray);
+      max-width: 520px;
+      margin: 0 auto 2.5rem;
+    }
+
+    /* QR MOCKUP */
+    .mockup {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 5rem;
+    }
+    .phone {
+      background: var(--dark);
+      border-radius: 2rem;
+      padding: 1rem;
+      width: 220px;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.18);
+    }
+    .phone-screen {
+      background: var(--white);
+      border-radius: 1.25rem;
+      overflow: hidden;
+    }
+    .phone-header {
+      background: var(--amber);
+      padding: 0.75rem 1rem;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--dark);
+    }
+    .phone-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.65rem 1rem;
+      border-bottom: 1px solid #f3f4f6;
+      font-size: 0.78rem;
+    }
+    .phone-item-name { font-weight: 500; }
+    .phone-item-price { color: var(--gray); }
+    .phone-add {
+      width: 22px;
+      height: 22px;
+      background: var(--amber);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--dark);
+      cursor: pointer;
+    }
+    .phone-cart {
+      background: var(--dark);
+      color: var(--white);
+      margin: 0.5rem;
+      border-radius: 0.75rem;
+      padding: 0.6rem 1rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-align: center;
+    }
+
+    /* BENEFITS */
+    .benefits {
+      background: var(--light);
+      padding: 5rem 1.5rem;
+    }
+    .benefits-inner {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .section-label {
+      text-align: center;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--amber);
+      margin-bottom: 0.75rem;
+    }
+    .section-title {
+      text-align: center;
+      font-size: clamp(1.6rem, 3.5vw, 2.2rem);
+      font-weight: 800;
+      letter-spacing: -0.3px;
+      margin-bottom: 3rem;
+    }
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.5rem;
+    }
+    .card {
+      background: var(--white);
+      border-radius: 1.25rem;
+      padding: 2rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+    }
+    .card-icon {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+    .card h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+    .card p {
+      font-size: 0.95rem;
+      color: var(--gray);
+    }
+
+    /* HOW IT WORKS */
+    .how {
+      padding: 5rem 1.5rem;
+      max-width: 700px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      margin-top: 3rem;
+      text-align: left;
+    }
+    .step {
+      display: flex;
+      gap: 1.25rem;
+      align-items: flex-start;
+      position: relative;
+    }
+    .step:not(:last-child)::after {
+      content: "";
+      position: absolute;
+      left: 19px;
+      top: 44px;
+      width: 2px;
+      height: calc(100% - 12px);
+      background: #e5e7eb;
+    }
+    .step-num {
+      flex-shrink: 0;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--amber);
+      color: var(--dark);
+      font-weight: 800;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      z-index: 1;
+    }
+    .step-body {
+      padding-bottom: 2.5rem;
+    }
+    .step-body h4 {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+    .step-body p {
+      font-size: 0.92rem;
+      color: var(--gray);
+    }
+
+    /* CTA */
+    .cta {
+      background: var(--dark);
+      color: var(--white);
+      text-align: center;
+      padding: 5rem 1.5rem;
+    }
+    .cta h2 {
+      font-size: clamp(1.6rem, 3.5vw, 2.2rem);
+      font-weight: 800;
+      margin-bottom: 1rem;
+      letter-spacing: -0.3px;
+    }
+    .cta p {
+      color: #9ca3af;
+      font-size: 1rem;
+      margin-bottom: 2rem;
+      max-width: 420px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .btn {
+      display: inline-block;
+      background: var(--amber);
+      color: var(--dark);
+      font-weight: 700;
+      font-size: 1rem;
+      padding: 0.85rem 2rem;
+      border-radius: 0.75rem;
+      text-decoration: none;
+      transition: opacity 0.15s;
+    }
+    .btn:hover { opacity: 0.9; }
+
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      font-size: 0.85rem;
+      color: var(--gray);
+      border-top: 1px solid #e5e7eb;
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <div class="logo">pi<span>de</span></div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="badge">Sistema de pedidos por QR</div>
+    <h1>Tus clientes piden.<br><em>Vos vendés más.</em></h1>
+    <p>Escaneá, elegí y pedí desde el celular. Sin esperar al mozo. Sin fricciones. Tu bar vende más, con el mismo equipo.</p>
+  </section>
+
+  <!-- PHONE MOCKUP -->
+  <div class="mockup">
+    <div class="phone">
+      <div class="phone-screen">
+        <div class="phone-header">🍺 Mesa 4 — Carta</div>
+        <div class="phone-item">
+          <div>
+            <div class="phone-item-name">Cerveza artesanal</div>
+            <div class="phone-item-price">$800</div>
+          </div>
+          <div class="phone-add">+</div>
+        </div>
+        <div class="phone-item">
+          <div>
+            <div class="phone-item-name">Vino copa</div>
+            <div class="phone-item-price">$700</div>
+          </div>
+          <div class="phone-add">+</div>
+        </div>
+        <div class="phone-item">
+          <div>
+            <div class="phone-item-name">Picada</div>
+            <div class="phone-item-price">$1.800</div>
+          </div>
+          <div class="phone-add">+</div>
+        </div>
+        <div class="phone-cart">Confirmar pedido →</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BENEFITS -->
+  <section class="benefits">
+    <div class="benefits-inner">
+      <div class="section-label">Ventajas</div>
+      <h2 class="section-title">Más ventas, menos fricción</h2>
+      <div class="cards">
+        <div class="card">
+          <div class="card-icon">📈</div>
+          <h3>Vendés más, sin esfuerzo extra</h3>
+          <p>Cuando el cliente puede pedir cuando quiere, sin esperar, pide más seguido. Una segunda ronda que antes se olvidaba, ahora la mandan desde la mesa.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">🙌</div>
+          <h3>Mozos enfocados en lo que importa</h3>
+          <p>Sin tomar pedidos manualmente, tu equipo se libera para traer los pedidos a tiempo y brindar mejor atención. Hacés más con el mismo personal.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">📱</div>
+          <h3>Sin app, sin registro</h3>
+          <p>El cliente escanea el QR de la mesa, elige del menú y confirma. Nada más. No hay que descargar nada ni crear una cuenta.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="how">
+    <div class="section-label">Cómo funciona</div>
+    <h2 class="section-title">Tres pasos, y listo</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <h4>El cliente escanea el QR de la mesa</h4>
+          <p>Cada mesa tiene un código QR único. Lo escanean con la cámara del celular — sin app, sin descarga.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <h4>Elige del menú y confirma el pedido</h4>
+          <p>Ve la carta actualizada, agrega productos al carrito y manda el pedido. En segundos.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <h4>Cocina y mozos lo ven al instante</h4>
+          <p>El pedido aparece en la pantalla de cocina. Cuando está listo, el mozo lo lleva a la mesa.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta">
+    <h2>¿Querés probarlo en tu bar?</h2>
+    <p>Implementación simple, sin infraestructura especial. Entramos en contacto y lo ponemos en marcha.</p>
+    <a class="btn" href="mailto:hola@pide.app">Hablemos</a>
+  </section>
+
+  <footer>
+    &copy; 2026 Pide — Sistema de comandas por QR
+  </footer>
+
+</body>
+</html>
