@@ -10,6 +10,10 @@ const pool = mysql.createPool({
   connectionLimit: 10,
   queueLimit: 0,
   timezone: "Z",
+  // Keep connections alive and discard stale ones so ETIMEDOUT on
+  // idle connections (common with remote shared hosting) is avoided.
+  enableKeepAlive: true,
+  keepAliveInitialDelay: 10000,
 });
 
 // Force UTC timezone on every new connection so timestamps
