@@ -3,13 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Pide — Pedidos por QR para tu bar</title>
+  <title>Pide — Para La Cuadra</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Anton&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --amber: #f59e0b;
-      --amber-light: #fde68a;
+      --brand: #d32f2f;
+      --brand-light: #fee2e2;
+      --brand-dark: #b71c1c;
       --dark: #111827;
       --gray: #6b7280;
       --light: #f9fafb;
@@ -31,13 +35,24 @@
       padding: 1.25rem 2rem;
       border-bottom: 1px solid #e5e7eb;
     }
-    .logo {
-      font-size: 1.5rem;
-      font-weight: 800;
-      letter-spacing: -0.5px;
-      color: var(--dark);
+    .nav-brand {
+      display: flex;
+      flex-direction: column;
+      line-height: 1;
     }
-    .logo span { color: var(--amber); }
+    .nav-name {
+      font-family: "Anton", Impact, sans-serif;
+      font-size: 1.6rem;
+      letter-spacing: 0.02em;
+      color: var(--brand);
+    }
+    .nav-sub {
+      font-size: 0.68rem;
+      color: var(--gray);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin-top: 0.1rem;
+    }
 
     /* HERO */
     .hero {
@@ -48,8 +63,8 @@
     }
     .badge {
       display: inline-block;
-      background: var(--amber-light);
-      color: #92400e;
+      background: var(--brand-light);
+      color: var(--brand-dark);
       font-size: 0.78rem;
       font-weight: 600;
       letter-spacing: 0.05em;
@@ -67,7 +82,7 @@
     }
     .hero h1 em {
       font-style: normal;
-      color: var(--amber);
+      color: var(--brand);
     }
     .hero p {
       font-size: 1.15rem;
@@ -95,11 +110,11 @@
       overflow: hidden;
     }
     .phone-header {
-      background: var(--amber);
+      background: var(--brand);
       padding: 0.75rem 1rem;
       font-size: 0.8rem;
       font-weight: 700;
-      color: var(--dark);
+      color: var(--white);
     }
     .phone-item {
       display: flex;
@@ -114,14 +129,14 @@
     .phone-add {
       width: 22px;
       height: 22px;
-      background: var(--amber);
+      background: var(--brand);
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 1rem;
       font-weight: 700;
-      color: var(--dark);
+      color: var(--white);
       cursor: pointer;
     }
     .phone-cart {
@@ -150,7 +165,7 @@
       font-weight: 600;
       letter-spacing: 0.08em;
       text-transform: uppercase;
-      color: var(--amber);
+      color: var(--brand);
       margin-bottom: 0.75rem;
     }
     .section-title {
@@ -219,8 +234,8 @@
       width: 40px;
       height: 40px;
       border-radius: 50%;
-      background: var(--amber);
-      color: var(--dark);
+      background: var(--brand);
+      color: var(--white);
       font-weight: 800;
       font-size: 1rem;
       display: flex;
@@ -242,85 +257,77 @@
       color: var(--gray);
     }
 
-    /* CTA */
-    .cta {
-      background: var(--dark);
+    /* CLOSING */
+    .closing {
+      background: var(--brand);
       color: var(--white);
       text-align: center;
       padding: 5rem 1.5rem;
     }
-    .cta h2 {
-      font-size: clamp(1.6rem, 3.5vw, 2.2rem);
-      font-weight: 800;
+    .closing h2 {
+      font-family: "Anton", Impact, sans-serif;
+      font-size: clamp(2rem, 5vw, 3rem);
+      letter-spacing: 0.02em;
       margin-bottom: 1rem;
-      letter-spacing: -0.3px;
     }
-    .cta p {
-      color: #9ca3af;
-      font-size: 1rem;
-      margin-bottom: 2rem;
-      max-width: 420px;
-      margin-left: auto;
-      margin-right: auto;
+    .closing p {
+      font-size: 1.05rem;
+      opacity: 0.85;
+      max-width: 440px;
+      margin: 0 auto;
     }
-    .btn {
-      display: inline-block;
-      background: var(--amber);
-      color: var(--dark);
-      font-weight: 700;
-      font-size: 1rem;
-      padding: 0.85rem 2rem;
-      border-radius: 0.75rem;
-      text-decoration: none;
-      transition: opacity 0.15s;
-    }
-    .btn:hover { opacity: 0.9; }
 
     footer {
       text-align: center;
       padding: 1.5rem;
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       color: var(--gray);
       border-top: 1px solid #e5e7eb;
+    }
+    footer a {
+      color: var(--gray);
     }
   </style>
 </head>
 <body>
 
   <nav>
-    <div class="logo">pi<span>de</span></div>
+    <div class="nav-brand">
+      <span class="nav-name">LA CUADRA</span>
+      <span class="nav-sub">Pide — sistema de pedidos por QR</span>
+    </div>
   </nav>
 
   <!-- HERO -->
   <section class="hero">
-    <div class="badge">Sistema de pedidos por QR</div>
-    <h1>Tus clientes piden.<br><em>Vos vendés más.</em></h1>
-    <p>Escaneá, elegí y pedí desde el celular. Sin esperar al mozo. Sin fricciones. Tu bar vende más, con el mismo equipo.</p>
+    <div class="badge">Propuesta para La Cuadra</div>
+    <h1>Casa de amigos.<br><em>Que pidan como amigos.</em></h1>
+    <p>Tus clientes escanean el QR de la mesa, eligen de la carta y mandan el pedido desde el celular. Sin esperar, sin fricción — y vos vendés más con el mismo equipo.</p>
   </section>
 
   <!-- PHONE MOCKUP -->
   <div class="mockup">
     <div class="phone">
       <div class="phone-screen">
-        <div class="phone-header">🍺 Mesa 4 — Carta</div>
+        <div class="phone-header">🍕 La Cuadra — Mesa 4</div>
         <div class="phone-item">
           <div>
-            <div class="phone-item-name">Cerveza artesanal</div>
-            <div class="phone-item-price">$800</div>
+            <div class="phone-item-name">Cerveza pinta</div>
+            <div class="phone-item-price">$6.000</div>
           </div>
           <div class="phone-add">+</div>
         </div>
         <div class="phone-item">
           <div>
-            <div class="phone-item-name">Vino copa</div>
-            <div class="phone-item-price">$700</div>
+            <div class="phone-item-name">Pizza muzza</div>
+            <div class="phone-item-price">$24.000</div>
           </div>
           <div class="phone-add">+</div>
         </div>
         <div class="phone-item">
           <div>
-            <div class="phone-item-name">Picada</div>
-            <div class="phone-item-price">$1.800</div>
+            <div class="phone-item-name">Fernet con Coca</div>
+            <div class="phone-item-price">$7.000</div>
           </div>
           <div class="phone-add">+</div>
         </div>
@@ -332,23 +339,23 @@
   <!-- BENEFITS -->
   <section class="benefits">
     <div class="benefits-inner">
-      <div class="section-label">Ventajas</div>
+      <div class="section-label">Por qué funciona</div>
       <h2 class="section-title">Más ventas, menos fricción</h2>
       <div class="cards">
         <div class="card">
           <div class="card-icon">📈</div>
-          <h3>Vendés más, sin esfuerzo extra</h3>
-          <p>Cuando el cliente puede pedir cuando quiere, sin esperar, pide más seguido. Una segunda ronda que antes se olvidaba, ahora la mandan desde la mesa.</p>
+          <h3>La segunda ronda ya no se pierde</h3>
+          <p>Cuando el cliente puede pedir cuando quiere, sin esperar al mozo, pide más seguido. Esa ronda que antes se olvidaba ahora llega sola desde la mesa.</p>
         </div>
         <div class="card">
           <div class="card-icon">🙌</div>
-          <h3>Mozos enfocados en lo que importa</h3>
-          <p>Sin tomar pedidos manualmente, tu equipo se libera para traer los pedidos a tiempo y brindar mejor atención. Hacés más con el mismo personal.</p>
+          <h3>El equipo hace menos trabajo ingrato</h3>
+          <p>Sin tomar pedidos a mano, los mozos se liberan para llevar la comida a tiempo y estar donde hace falta. Más rendimiento, sin sumar personal.</p>
         </div>
         <div class="card">
           <div class="card-icon">📱</div>
-          <h3>Sin app, sin registro</h3>
-          <p>El cliente escanea el QR de la mesa, elige del menú y confirma. Nada más. No hay que descargar nada ni crear una cuenta.</p>
+          <h3>El cliente no descarga nada</h3>
+          <p>Cámara del celular, QR, carta. Eso es todo. Sin app, sin registro, sin fricción. Funciona en cualquier celular.</p>
         </div>
       </div>
     </div>
@@ -356,42 +363,41 @@
 
   <!-- HOW IT WORKS -->
   <section class="how">
-    <div class="section-label">Cómo funciona</div>
+    <div class="section-label">Cómo funciona en La Cuadra</div>
     <h2 class="section-title">Tres pasos, y listo</h2>
     <div class="steps">
       <div class="step">
         <div class="step-num">1</div>
         <div class="step-body">
           <h4>El cliente escanea el QR de la mesa</h4>
-          <p>Cada mesa tiene un código QR único. Lo escanean con la cámara del celular — sin app, sin descarga.</p>
+          <p>Cada mesa tiene su propio código QR. Lo escanean con la cámara y se abre la carta de La Cuadra en el celular — sin descargar nada.</p>
         </div>
       </div>
       <div class="step">
         <div class="step-num">2</div>
         <div class="step-body">
-          <h4>Elige del menú y confirma el pedido</h4>
-          <p>Ve la carta actualizada, agrega productos al carrito y manda el pedido. En segundos.</p>
+          <h4>Elige y confirma desde el celular</h4>
+          <p>Navegan la carta, agregan lo que quieren y mandan el pedido. En segundos, sin intermediarios.</p>
         </div>
       </div>
       <div class="step">
         <div class="step-num">3</div>
         <div class="step-body">
           <h4>Cocina y mozos lo ven al instante</h4>
-          <p>El pedido aparece en la pantalla de cocina. Cuando está listo, el mozo lo lleva a la mesa.</p>
+          <p>El pedido aparece en pantalla en cocina. Cuando está listo, el mozo lo lleva. Sin papel, sin malentendidos.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- CTA -->
-  <section class="cta">
-    <h2>¿Querés probarlo en tu bar?</h2>
-    <p>Implementación simple, sin infraestructura especial. Entramos en contacto y lo ponemos en marcha.</p>
-    <a class="btn" href="mailto:hola@pide.app">Hablemos</a>
+  <!-- CLOSING -->
+  <section class="closing">
+    <h2>LISTO PARA LA CUADRA.</h2>
+    <p>Sistema funcionando, carta cargada, mesas con QR. Solo falta ponerlo en marcha.</p>
   </section>
 
   <footer>
-    &copy; 2026 Pide — Sistema de comandas por QR
+    &copy; 2026 Pide &mdash; <a href="mailto:famicucci@gmail.com">famicucci@gmail.com</a>
   </footer>
 
 </body>
