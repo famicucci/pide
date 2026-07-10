@@ -76,15 +76,15 @@ export function Cart({ items, total, count, onUpdateQuantity, onUpdateNotes, onS
   const [orderNotes, setOrderNotes] = useState("");
   const [confirming, setConfirming] = useState(false);
 
-  // Lock body scroll when confirmation modal is open
+  // Lock body scroll when cart sheet or confirm modal is open
   useEffect(() => {
-    if (confirming) {
+    if (open || confirming) {
       document.body.style.overflow = "hidden";
     } else {
       document.body.style.overflow = "";
     }
     return () => { document.body.style.overflow = ""; };
-  }, [confirming]);
+  }, [open, confirming]);
 
   if (count === 0) return null;
 
