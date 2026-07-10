@@ -172,20 +172,41 @@ export async function POST(request: NextRequest) {
     await conn.beginTransaction();
 
     // Open the table on its first order of a new session BEFORE inserting the
-    // order, so opened_at is always <= every order's created_at in the session
-    // (otherwise a second-boundary crossing could exclude the opening order).
-    // opened_at is stamped only when the table was closed; assignment order
-    // matters in MySQL (opened_at is evaluated before is_open is updated).
+    // order, so opened_at is always <= every order's created_at in the session.
     await conn.execute(
       "UPDATE `tables` SET opened_at = IF(is_open = 0, NOW(), opened_at), is_open = 1 WHERE id = ?",
       [table.id]
     );
 
-    const [orderResult] = await conn.execute<ResultSetHeader>(
-      "INSERT INTO orders (table_id, status, notes) VALUES (?, 'pending', ?)",
-      [table.id, notes || null]
+    // If a pending order from this table was placed within the last 5 minutes,
+    // append the new items to it instead of creating a separate order.
+    interface RecentOrderRow extends RowDataPacket { id: number }
+    const [recentRows] = await conn.execute<RecentOrderRow[]>(
+      `SELECT id FROM orders
+       WHERE table_id = ? AND status = 'pending'
+         AND created_at >= NOW() - INTERVAL 5 MINUTE
+       ORDER BY created_at DESC LIMIT 1`,
+      [table.id]
     );
-    const orderId = orderResult.insertId;
+
+    let orderId: number;
+
+    if (recentRows.length) {
+      orderId = recentRows[0].id;
+      // Append notes to the existing order if provided
+      if (notes) {
+        await conn.execute(
+          "UPDATE orders SET notes = CONCAT_WS(' / ', notes, ?) WHERE id = ?",
+          [notes, orderId]
+        );
+      }
+    } else {
+      const [orderResult] = await conn.execute<ResultSetHeader>(
+        "INSERT INTO orders (table_id, status, notes) VALUES (?, 'pending', ?)",
+        [table.id, notes || null]
+      );
+      orderId = orderResult.insertId;
+    }
 
     for (const item of items) {
       await conn.execute(
