@@ -155,6 +155,7 @@ export default function LandingPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <Link
               href="/mesa/8d6f4296-b6e4-4ce4-94b5-de300069cd70"
+              target="_blank"
               className="bg-white rounded-2xl p-8 shadow-sm hover:shadow-md transition-shadow flex flex-col gap-3"
             >
               <span className="text-4xl">📱</span>
@@ -168,6 +169,7 @@ export default function LandingPage() {
             </Link>
             <Link
               href="/admin"
+              target="_blank"
               className="bg-white rounded-2xl p-8 shadow-sm hover:shadow-md transition-shadow flex flex-col gap-3"
             >
               <span className="text-4xl">⚙️</span>
@@ -181,6 +183,7 @@ export default function LandingPage() {
             </Link>
             <Link
               href="/cocina"
+              target="_blank"
               className="bg-white rounded-2xl p-8 shadow-sm hover:shadow-md transition-shadow flex flex-col gap-3"
             >
               <span className="text-4xl">🍕</span>
@@ -194,6 +197,7 @@ export default function LandingPage() {
             </Link>
             <Link
               href="/mozo"
+              target="_blank"
               className="bg-white rounded-2xl p-8 shadow-sm hover:shadow-md transition-shadow flex flex-col gap-3"
             >
               <span className="text-4xl">🛎️</span>
