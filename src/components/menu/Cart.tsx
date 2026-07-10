@@ -4,7 +4,7 @@ import { useState } from "react";
 import { CartItem } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ShoppingCart, Plus, Minus, X, MessageSquare } from "lucide-react";
+import { ShoppingCart, Plus, Minus, X, MessageSquare, CheckCircle2 } from "lucide-react";
 
 interface Props {
   items: CartItem[];
@@ -74,6 +74,7 @@ function CartItemRow({
 export function Cart({ items, total, count, onUpdateQuantity, onUpdateNotes, onSubmit, submitting }: Props) {
   const [open, setOpen] = useState(false);
   const [orderNotes, setOrderNotes] = useState("");
+  const [confirming, setConfirming] = useState(false);
 
   if (count === 0) return null;
 
@@ -127,13 +128,72 @@ export function Cart({ items, total, count, onUpdateQuantity, onUpdateNotes, onS
         <div className="p-4 border-t bg-white">
           <Button
             className="w-full h-12 text-base"
-            onClick={() => onSubmit(orderNotes)}
+            onClick={() => setConfirming(true)}
             disabled={submitting}
           >
             {submitting ? "Enviando..." : "Enviar pedido"}
           </Button>
         </div>
       </div>
+
+      {/* Confirm modal */}
+      {confirming && (
+        <div className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setConfirming(false)} />
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 space-y-5 animate-in slide-in-from-bottom-4 duration-200">
+            <div className="flex flex-col items-center text-center gap-3">
+              <div className="bg-primary/10 rounded-full p-3">
+                <CheckCircle2 className="h-7 w-7 text-primary" />
+              </div>
+              <div>
+                <h3 className="font-bold text-lg">¿Confirmás el pedido?</h3>
+                <p className="text-muted-foreground text-sm mt-1">
+                  Una vez enviado, el pedido va directo a la barra.
+                </p>
+              </div>
+            </div>
+
+            {/* Summary */}
+            <div className="bg-muted/50 rounded-xl px-4 py-3 space-y-1.5">
+              {items.map((item) => (
+                <div key={item.product.id} className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">
+                    <span className="font-semibold text-foreground">{item.quantity}×</span>{" "}
+                    {item.product.name}
+                    {item.notes && <span className="italic"> ({item.notes})</span>}
+                  </span>
+                </div>
+              ))}
+              {orderNotes && (
+                <p className="text-xs text-muted-foreground italic border-t pt-1.5 mt-1">
+                  "{orderNotes}"
+                </p>
+              )}
+            </div>
+
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                className="flex-1"
+                onClick={() => setConfirming(false)}
+                disabled={submitting}
+              >
+                Revisar
+              </Button>
+              <Button
+                className="flex-1"
+                disabled={submitting}
+                onClick={async () => {
+                  await onSubmit(orderNotes);
+                  setConfirming(false);
+                }}
+              >
+                {submitting ? "Enviando..." : "Confirmar"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Sticky cart button */}
       <div className="fixed bottom-4 left-4 right-4 z-30">
