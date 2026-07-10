@@ -143,6 +143,59 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* DEMO LINKS */}
+      <section className="bg-gray-50 px-6 py-20">
+        <div className="max-w-3xl mx-auto">
+          <p className="text-center text-xs font-semibold uppercase tracking-widest text-primary mb-3">
+            Probalo en vivo
+          </p>
+          <h2 className="text-center text-[clamp(1.6rem,3.5vw,2.2rem)] font-extrabold tracking-tight mb-12">
+            Entrá a cada pantalla
+          </h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <Link
+              href="/mesa/8d6f4296-b6e4-4ce4-94b5-de300069cd70"
+              className="bg-white rounded-2xl p-8 shadow-sm hover:shadow-md transition-shadow flex flex-col gap-3"
+            >
+              <span className="text-4xl">📱</span>
+              <div>
+                <h3 className="font-bold text-lg">Vista del cliente</h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Lo que ve el cliente cuando escanea el QR de la mesa.
+                </p>
+              </div>
+              <span className="text-sm font-semibold text-primary mt-auto">Abrir →</span>
+            </Link>
+            <Link
+              href="/admin"
+              className="bg-white rounded-2xl p-8 shadow-sm hover:shadow-md transition-shadow flex flex-col gap-3"
+            >
+              <span className="text-4xl">⚙️</span>
+              <div>
+                <h3 className="font-bold text-lg">Panel admin</h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Gestión de mesas, carta y usuarios. Requiere login.
+                </p>
+              </div>
+              <span className="text-sm font-semibold text-primary mt-auto">Abrir →</span>
+            </Link>
+            <Link
+              href="/cocina"
+              className="bg-white rounded-2xl p-8 shadow-sm hover:shadow-md transition-shadow flex flex-col gap-3"
+            >
+              <span className="text-4xl">🍕</span>
+              <div>
+                <h3 className="font-bold text-lg">Pantalla de la barra</h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Lo que ve la barra cuando llega un pedido. Requiere login.
+                </p>
+              </div>
+              <span className="text-sm font-semibold text-primary mt-auto">Abrir →</span>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* CLOSING */}
       <section className="bg-primary text-primary-foreground text-center px-6 py-20">
         <h2 className="font-logo text-[clamp(2rem,5vw,3rem)] tracking-wide mb-4">
