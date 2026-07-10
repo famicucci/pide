@@ -23,7 +23,7 @@ function storageKey(token: string) {
 
 function getStored(token: string): StoredSession | null {
   try {
-    const raw = sessionStorage.getItem(storageKey(token));
+    const raw = localStorage.getItem(storageKey(token));
     return raw ? JSON.parse(raw) : null;
   } catch {
     return null;
@@ -31,11 +31,11 @@ function getStored(token: string): StoredSession | null {
 }
 
 function saveStored(token: string, session: StoredSession) {
-  sessionStorage.setItem(storageKey(token), JSON.stringify(session));
+  localStorage.setItem(storageKey(token), JSON.stringify(session));
 }
 
 function clearStored(token: string) {
-  sessionStorage.removeItem(storageKey(token));
+  localStorage.removeItem(storageKey(token));
 }
 
 type State = "loading" | "gate" | "verified";
