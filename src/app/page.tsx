@@ -145,7 +145,7 @@ export default function LandingPage() {
 
       {/* DEMO LINKS */}
       <section className="bg-gray-50 px-6 py-20">
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-5xl mx-auto">
           <p className="text-center text-xs font-semibold uppercase tracking-widest text-primary mb-3">
             Probalo en vivo
           </p>
