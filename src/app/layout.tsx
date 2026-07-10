@@ -1,11 +1,17 @@
 import type { Metadata, Viewport } from "next";
-import { Anton } from "next/font/google";
+import { Anton, Urbanist } from "next/font/google";
 import "./globals.css";
 
 const anton = Anton({
   weight: "400",
   subsets: ["latin"],
   variable: "--font-anton",
+  display: "swap",
+});
+
+const urbanist = Urbanist({
+  subsets: ["latin"],
+  variable: "--font-urbanist",
   display: "swap",
 });
 
@@ -31,7 +37,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className={`h-full ${anton.variable}`}>
+    <html lang="es" className={`h-full ${anton.variable} ${urbanist.variable}`}>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   );
