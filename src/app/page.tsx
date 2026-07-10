@@ -152,7 +152,7 @@ export default function LandingPage() {
           <h2 className="text-center text-[clamp(1.6rem,3.5vw,2.2rem)] font-extrabold tracking-tight mb-12">
             Entrá a cada pantalla
           </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             <Link
               href="/mesa/8d6f4296-b6e4-4ce4-94b5-de300069cd70"
               className="bg-white rounded-2xl p-8 shadow-sm hover:shadow-md transition-shadow flex flex-col gap-3"
@@ -188,6 +188,19 @@ export default function LandingPage() {
                 <h3 className="font-bold text-lg">Pantalla de la barra</h3>
                 <p className="text-sm text-muted-foreground mt-1">
                   Lo que ve la barra cuando llega un pedido. Requiere login.
+                </p>
+              </div>
+              <span className="text-sm font-semibold text-primary mt-auto">Abrir →</span>
+            </Link>
+            <Link
+              href="/mozo"
+              className="bg-white rounded-2xl p-8 shadow-sm hover:shadow-md transition-shadow flex flex-col gap-3"
+            >
+              <span className="text-4xl">🛎️</span>
+              <div>
+                <h3 className="font-bold text-lg">Pantalla del mozo</h3>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Lo que ve el mozo para saber qué llevar a cada mesa. Requiere login.
                 </p>
               </div>
               <span className="text-sm font-semibold text-primary mt-auto">Abrir →</span>
