@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { CartItem } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -75,6 +75,16 @@ export function Cart({ items, total, count, onUpdateQuantity, onUpdateNotes, onS
   const [open, setOpen] = useState(false);
   const [orderNotes, setOrderNotes] = useState("");
   const [confirming, setConfirming] = useState(false);
+
+  // Lock body scroll when confirmation modal is open
+  useEffect(() => {
+    if (confirming) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => { document.body.style.overflow = ""; };
+  }, [confirming]);
 
   if (count === 0) return null;
 

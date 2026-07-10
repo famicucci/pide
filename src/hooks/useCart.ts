@@ -1,10 +1,30 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { CartItem, Product } from "@/types";
 
-export function useCart() {
-  const [items, setItems] = useState<CartItem[]>([]);
+function storageKey(tableToken: string) {
+  return `cart-${tableToken}`;
+}
+
+export function useCart(tableToken?: string) {
+  const [items, setItems] = useState<CartItem[]>(() => {
+    if (!tableToken) return [];
+    try {
+      const raw = localStorage.getItem(storageKey(tableToken));
+      return raw ? JSON.parse(raw) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  // Persist to localStorage on every change
+  useEffect(() => {
+    if (!tableToken) return;
+    try {
+      localStorage.setItem(storageKey(tableToken), JSON.stringify(items));
+    } catch {}
+  }, [items, tableToken]);
 
   const addItem = useCallback((product: Product) => {
     setItems((prev) => {
@@ -38,7 +58,12 @@ export function useCart() {
     );
   }, []);
 
-  const clear = useCallback(() => setItems([]), []);
+  const clear = useCallback(() => {
+    setItems([]);
+    if (tableToken) {
+      try { localStorage.removeItem(storageKey(tableToken)); } catch {}
+    }
+  }, [tableToken]);
 
   const total = items.reduce((sum, i) => sum + i.product.price * i.quantity, 0);
   const count = items.reduce((sum, i) => sum + i.quantity, 0);

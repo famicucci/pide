@@ -23,7 +23,7 @@ export function MenuClient({ tableName, tableToken }: Props) {
   const [confirmed, setConfirmed] = useState(false);
   const [orderId, setOrderId] = useState<number | null>(null);
 
-  const { items, total, count, addItem, updateQuantity, updateNotes, clear } = useCart();
+  const { items, total, count, addItem, updateQuantity, updateNotes, clear } = useCart(tableToken);
 
   useEffect(() => {
     fetch("/api/menu")
