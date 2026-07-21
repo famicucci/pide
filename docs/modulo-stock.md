@@ -9,8 +9,8 @@ La primera versión busca reemplazar las planillas de papel que usa actualmente 
 ## Alcance del MVP
 
 - Mantener un catálogo de stock separado de los productos del menú.
-- Registrar artículos con categoría obligatoria, marca opcional, nombre, unidad, orden y mínimos de temporada.
-- Permitir que cualquier empleado autenticado consulte y modifique directamente la cantidad actual.
+- Registrar artículos con categoría obligatoria, marca opcional, nombre, unidad, orden y mínimos de temporada opcionales.
+- Permitir que administradores y usuarios de carga de stock consulten y modifiquen directamente la cantidad actual.
 - Aplicar cada cambio al guardarlo, sin borradores ni cierre de planilla.
 - Registrar automáticamente el responsable, fecha, valor anterior, valor nuevo y diferencia.
 - Permitir una observación opcional al realizar un cambio.
@@ -30,11 +30,13 @@ Quedan fuera del MVP:
 Extender `scripts/migrate.ts` y mantener alineado `scripts/migrate.sql` con migraciones idempotentes para:
 
 - `stock_categories`: nombre, orden y estado activo.
-- `stock_items`: categoría obligatoria, marca opcional, nombre, unidad, cantidad actual decimal, mínimo de temporada baja, mínimo de temporada alta, orden, estado activo y fecha de última modificación.
-- `stock_movements`: artículo, responsable, valor anterior, valor nuevo, diferencia, observación y fecha.
+- `stock_items`: categoría obligatoria, marca opcional, nombre, unidad, cantidad actual decimal, mínimos opcionales de temporada baja y alta, orden, estado activo y fecha de última modificación.
+- `stock_movements`: artículo, tipo de movimiento (`initial` o `adjustment`), responsable, valor anterior nullable, valor nuevo, diferencia, observación y fecha.
 - `stock_high_season_dates`: fechas marcadas por el administrador como temporada alta. Toda fecha sin registro se considera temporada baja.
 
 Cada actualización bloqueará el artículo, actualizará su cantidad actual e insertará el movimiento dentro de una misma transacción. De esta manera se evita perder cambios concurrentes y el historial queda como una auditoría inmutable.
+
+Al crear un artículo se guardará su cantidad y se generará un movimiento especial `initial`. Este movimiento tendrá valor anterior nulo y permitirá distinguir la carga inicial de un ajuste posterior.
 
 Los artículos y categorías se desactivarán en lugar de eliminarse para preservar correctamente el historial.
 
@@ -52,8 +54,10 @@ Crear Route Handlers bajo `src/app/api/stock/` para:
 
 Reglas de acceso:
 
-- Todos los roles autenticados (`admin`, `waiter` y `kitchen`) pueden consultar y modificar el stock.
+- El rol `stock` tendrá acceso exclusivo a la pantalla de carga rápida `/stock`.
+- El rol `admin` podrá acceder a `/stock` y a todas las funciones administrativas.
 - Solamente `admin` puede administrar el catálogo y consultar el historial completo.
+- Los roles y pantallas anteriores de mozo y cocina se conservarán en el código, pero quedarán fuera del alcance activo y de la landing.
 - Las cantidades no pueden ser negativas.
 - Los movimientos históricos no pueden editarse ni eliminarse.
 - La actualización del stock y la creación del movimiento deben realizarse en una misma transacción.
@@ -86,6 +90,25 @@ El administrador continuará ingresando a `/admin` después del login. La navega
 - **Stock**, con un contador de artículos que estén en estado de stock bajo.
 
 Las entradas de **Menú** y **Mesas** se ocultarán temporalmente de la navegación. Sus páginas, APIs y código se conservarán para retomarlos más adelante.
+
+## Landing y acceso
+
+La landing `src/app/page.tsx` se adaptará al nuevo alcance sin perder la personalización para La Cuadra:
+
+- Presentará Pide como una solución simple para reemplazar las planillas manuales de stock.
+- Explicará la carga móvil, el historial de cambios, los mínimos por temporada y las alertas.
+- Reemplazará el ejemplo visual de pedidos por una representación de la pantalla de actualización de stock.
+- Eliminará los accesos visibles a cliente QR, cocina y mozo.
+- Mostrará únicamente dos accesos destacados: **Panel administrador** y **Carga de stock**.
+
+Cada acceso abrirá el login con el contexto elegido:
+
+- **Panel administrador** → `/login?access=admin` → después de autenticar, `/admin`.
+- **Carga de stock** → `/login?access=stock` → después de autenticar, `/stock`.
+
+No habrá ingreso automático ni credenciales expuestas en la landing. El login deberá comunicar claramente a qué área se está accediendo y respetar el rol real del usuario autenticado.
+
+Para soportar este flujo se agregará el rol `stock` al esquema de usuarios, los tipos de sesión, el middleware y los redireccionamientos de login. También se creará un usuario inicial de carga de stock mediante el script de usuarios.
 
 ### Dashboard
 
@@ -125,6 +148,8 @@ Cada artículo podrá tener dos mínimos configurables por el administrador:
 - Stock mínimo de temporada baja.
 - Stock mínimo de temporada alta.
 
+Ambos valores serán opcionales. Un artículo solo generará alertas durante una temporada si tiene configurado el mínimo correspondiente.
+
 Cuando la cantidad actual sea menor o igual al mínimo aplicable, la aplicación deberá:
 
 - Marcar claramente el artículo como stock bajo.
@@ -152,15 +177,17 @@ Las alertas serán internas a la aplicación durante el MVP; no se implementará
 2. Agregar el esquema idempotente y los tipos de stock.
 3. Implementar las APIs del catálogo, actualización transaccional, mínimos, calendario, alertas e historial.
 4. Construir la pantalla móvil de carga.
-5. Adaptar el Dashboard y la navegación administrativa.
-6. Agregar la gestión de artículos, alertas, historial y temporadas.
-7. Preparar el seed revisable.
-8. Verificar el flujo completo y el build de producción.
+5. Adaptar la landing, el login contextual y el rol `stock`.
+6. Adaptar el Dashboard y la navegación administrativa.
+7. Agregar la gestión de artículos, alertas, historial y temporadas.
+8. Preparar el seed revisable.
+9. Verificar el flujo completo y el build de producción.
 
 ## Verificación
 
 - Ejecutar la migración localmente y comprobar que sea idempotente.
-- Probar permisos para `admin`, `waiter` y `kitchen`.
+- Probar que `stock` solo acceda a `/stock` y que `admin` acceda tanto a `/stock` como al panel.
+- Verificar ambos accesos contextuales de la landing y sus redireccionamientos.
 - Probar actualizaciones consecutivas y concurrentes del mismo artículo.
 - Confirmar que cada cambio genere exactamente un movimiento inmutable con usuario y fecha.
 - Verificar cantidades enteras y fraccionarias.
