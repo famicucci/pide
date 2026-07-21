@@ -9,7 +9,7 @@ La primera versión busca reemplazar las planillas de papel que usa actualmente 
 ## Alcance del MVP
 
 - Mantener un catálogo de stock separado de los productos del menú.
-- Registrar artículos con categoría, marca, nombre, unidad y orden.
+- Registrar artículos con categoría obligatoria, marca opcional, nombre, unidad, orden y mínimos de temporada.
 - Permitir que cualquier empleado autenticado consulte y modifique directamente la cantidad actual.
 - Aplicar cada cambio al guardarlo, sin borradores ni cierre de planilla.
 - Registrar automáticamente el responsable, fecha, valor anterior, valor nuevo y diferencia.
@@ -30,8 +30,9 @@ Quedan fuera del MVP:
 Extender `scripts/migrate.ts` y mantener alineado `scripts/migrate.sql` con migraciones idempotentes para:
 
 - `stock_categories`: nombre, orden y estado activo.
-- `stock_items`: categoría, marca opcional, nombre, unidad, cantidad actual decimal, orden, estado activo y fecha de última modificación.
+- `stock_items`: categoría obligatoria, marca opcional, nombre, unidad, cantidad actual decimal, mínimo de temporada baja, mínimo de temporada alta, orden, estado activo y fecha de última modificación.
 - `stock_movements`: artículo, responsable, valor anterior, valor nuevo, diferencia, observación y fecha.
+- `stock_high_season_dates`: fechas marcadas por el administrador como temporada alta. Toda fecha sin registro se considera temporada baja.
 
 Cada actualización bloqueará el artículo, actualizará su cantidad actual e insertará el movimiento dentro de una misma transacción. De esta manera se evita perder cambios concurrentes y el historial queda como una auditoría inmutable.
 
@@ -46,6 +47,8 @@ Crear Route Handlers bajo `src/app/api/stock/` para:
 - Actualizar la cantidad de un artículo y generar su movimiento.
 - Listar el historial de movimientos.
 - Consultar el detalle de cada modificación.
+- Consultar los artículos cuyo stock actual sea menor o igual al mínimo aplicable.
+- Administrar las fechas de temporada alta.
 
 Reglas de acceso:
 
@@ -73,15 +76,45 @@ Crear una pantalla móvil en `src/app/stock/page.tsx`, optimizada para recorrer 
 
 Cada guardado impactará inmediatamente en el stock y generará un registro histórico con la diferencia. No habrá un botón para finalizar toda la planilla.
 
-El administrador ingresará directamente a Stock después del login. En `src/app/admin/layout.tsx` se agregará Stock como única opción visible y se comentarán temporalmente las entradas de Dashboard, Menú y Mesas. Sus páginas y APIs seguirán existiendo y podrán abrirse por URL, pero no aparecerán en la navegación.
+La misma pantalla `/stock` será utilizada por empleados y administradores. Desde el módulo administrativo habrá un botón **Actualizar stock** que abrirá esta pantalla, evitando mantener dos experiencias diferentes para la misma tarea.
 
-## Administración e historial
+## Panel administrativo
 
-Crear:
+El administrador continuará ingresando a `/admin` después del login. La navegación lateral mostrará temporalmente:
 
-- `src/app/admin/stock/page.tsx` para crear y gestionar categorías y artículos, incluyendo marca opcional, unidad, cantidad inicial, orden y estado activo.
-- `src/app/admin/stock/historial/page.tsx` para listar movimientos por fecha, responsable y artículo.
-- Una vista de detalle con valor anterior, valor nuevo, diferencia y observación.
+- **Dashboard**
+- **Stock**, con un contador de artículos que estén en estado de stock bajo.
+
+Las entradas de **Menú** y **Mesas** se ocultarán temporalmente de la navegación. Sus páginas, APIs y código se conservarán para retomarlos más adelante.
+
+### Dashboard
+
+El Dashboard dejará ocultos temporalmente los indicadores de pedidos y mesas. En su lugar mostrará un banner de estado de stock:
+
+- Si existen faltantes: cantidad de artículos con stock bajo y acceso **Ver artículos**.
+- Si no existen faltantes: estado positivo indicando que todo el stock está por encima del mínimo.
+
+El banner abrirá `/admin/stock/alertas`.
+
+### Pantalla principal de Stock
+
+`/admin/stock` será el centro de gestión administrativa. Incluirá:
+
+- Resumen de artículos activos, artículos con stock bajo y última actualización.
+- Botón principal **Actualizar stock**, que abre `/stock`.
+- Botón **Nuevo artículo**, que abre el formulario de creación.
+- Buscador y filtros por categoría, marca y estado.
+- Navegación interna por **Artículos**, **Alertas**, **Historial** y **Temporadas**.
+
+La sección **Artículos**, seleccionada por defecto, mostrará tarjetas compactas con marca, nombre, categoría, stock actual, mínimos y estado. No permitirá editar todos los campos directamente en la lista.
+
+La creación y edición completa de un artículo se realizará en un formulario enfocado: pantalla completa en móvil y diálogo o panel lateral en escritorio. Esta separación reduce errores accidentales y mantiene legible la lista administrativa. La edición de cantidades seguirá reservada a la carga rápida de `/stock`.
+
+### Alertas e historial
+
+- `/admin/stock/alertas` mostrará los artículos con stock bajo, incluyendo stock actual, mínimo aplicable, faltante, temporada activa y acceso rápido para actualizar stock.
+- `/admin/stock/historial` listará movimientos por fecha, responsable y artículo.
+- El detalle de un movimiento mostrará valor anterior, valor nuevo, diferencia y observación.
 
 También se preparará un seed separado con los artículos legibles de las planillas. Los nombres o valores dudosos deberán revisarse antes de cargarlos.
 
@@ -99,27 +132,29 @@ Cuando la cantidad actual sea menor o igual al mínimo aplicable, la aplicación
 - Mantenerlo visible en una lista de alertas mientras continúe por debajo o igual al mínimo.
 - Resolver la alerta cuando el stock vuelva a superar el mínimo.
 
-La temporada aplicable debe determinarse automáticamente; no se le exigirá al administrador cambiarla manualmente cada día.
+La temporada aplicable se determinará automáticamente según la fecha local de La Cuadra:
 
-### Decisión pendiente
+- Todas las fechas serán de temporada baja por defecto.
+- El administrador marcará en un calendario únicamente las fechas o rangos de temporada alta.
+- No será necesario cambiar manualmente la temporada cada día.
 
-Todavía debe definirse cómo se programan las temporadas sin volver compleja la administración. Las alternativas consideradas son:
+Las alertas serán internas a la aplicación durante el MVP; no se implementarán notificaciones push:
 
-1. Días semanales recurrentes, por ejemplo viernes y sábado como temporada alta.
-2. Fechas o rangos específicos en un calendario.
-3. Una regla semanal sencilla con excepciones para feriados, eventos o fines de semana particulares.
-
-También queda por definir el canal de notificación inicial: aviso dentro de la aplicación, notificación del navegador u otro medio. Estas decisiones deben resolverse antes de cerrar el modelo de datos y desarrollar las alertas.
+- La opción **Stock** de la navegación mostrará un contador.
+- El Dashboard mostrará el banner resumido.
+- La pantalla de alertas mostrará el detalle completo.
+- El estado se calculará a partir del stock actual, los mínimos y el calendario, sin una tabla adicional de notificaciones.
+- Si el cambio de fecha activa un mínimo más alto, el artículo aparecerá como stock bajo aunque nadie haya modificado su cantidad ese día.
 
 ## Etapas de implementación
 
 1. Consultar la documentación local de Next.js 16 aplicable a Route Handlers, sesiones y navegación.
-2. Resolver el calendario de temporadas y el canal de notificación.
-3. Agregar el esquema idempotente y los tipos de stock.
-4. Implementar las APIs del catálogo, actualización transaccional, mínimos, alertas e historial.
-5. Construir la pantalla móvil de carga.
-6. Agregar la administración del catálogo y el historial comparativo.
-7. Ajustar la navegación administrativa y preparar el seed revisable.
+2. Agregar el esquema idempotente y los tipos de stock.
+3. Implementar las APIs del catálogo, actualización transaccional, mínimos, calendario, alertas e historial.
+4. Construir la pantalla móvil de carga.
+5. Adaptar el Dashboard y la navegación administrativa.
+6. Agregar la gestión de artículos, alertas, historial y temporadas.
+7. Preparar el seed revisable.
 8. Verificar el flujo completo y el build de producción.
 
 ## Verificación
