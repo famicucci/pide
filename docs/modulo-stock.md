@@ -32,11 +32,16 @@ Extender `scripts/migrate.ts` y mantener alineado `scripts/migrate.sql` con migr
 - `stock_categories`: nombre, orden y estado activo.
 - `stock_items`: categoría obligatoria, marca opcional, nombre, unidad, cantidad actual decimal, mínimos opcionales de temporada baja y alta, orden, estado activo y fecha de última modificación.
 - `stock_movements`: artículo, tipo de movimiento (`initial` o `adjustment`), responsable, valor anterior nullable, valor nuevo, diferencia, observación y fecha.
-- `stock_high_season_dates`: fechas marcadas por el administrador como temporada alta. Toda fecha sin registro se considera temporada baja.
+- `stock_high_season_dates`: una fila por fecha (`DATE` único) marcada como temporada alta. Toda fecha sin registro se considera temporada baja. Un rango seleccionado en la interfaz se persistirá como filas individuales.
+- Ampliar el `ENUM` de `role` en la tabla `users` para incluir `stock`. Esta migración es requisito para que el usuario de carga de stock pueda crearse.
 
-Cada actualización bloqueará el artículo, actualizará su cantidad actual e insertará el movimiento dentro de una misma transacción. De esta manera se evita perder cambios concurrentes y el historial queda como una auditoría inmutable.
+Cada actualización de cantidad bloqueará la fila del artículo (`SELECT ... FOR UPDATE`), actualizará su cantidad actual e insertará el movimiento dentro de una misma transacción. De esta manera se evita perder cambios concurrentes y el historial queda como una auditoría inmutable.
 
 Al crear un artículo se guardará su cantidad y se generará un movimiento especial `initial`. Este movimiento tendrá valor anterior nulo y permitirá distinguir la carga inicial de un ajuste posterior.
+
+Editar los mínimos, la marca u otros metadatos de un artículo no generará movimientos: el historial registra únicamente cambios de cantidad.
+
+La unidad será un texto corto por artículo (por ejemplo `botellas`, `kg`, `latas`). La interfaz de creación ofrecerá sugerencias frecuentes, pero el valor se almacenará como cadena libre para no limitar los insumos de la planilla.
 
 Los artículos y categorías se desactivarán en lugar de eliminarse para preservar correctamente el historial.
 
@@ -106,9 +111,9 @@ Cada acceso abrirá el login con el contexto elegido:
 - **Panel administrador** → `/login?access=admin` → después de autenticar, `/admin`.
 - **Carga de stock** → `/login?access=stock` → después de autenticar, `/stock`.
 
-No habrá ingreso automático ni credenciales expuestas en la landing. El login deberá comunicar claramente a qué área se está accediendo y respetar el rol real del usuario autenticado.
+No habrá ingreso automático ni credenciales expuestas en la landing. El parámetro `access` solo personaliza el mensaje del login; el destino final siempre se decidirá por el rol real del usuario autenticado. Si un usuario `stock` ingresa por el acceso de administrador, será redirigido igualmente a `/stock`, y viceversa.
 
-Para soportar este flujo se agregará el rol `stock` al esquema de usuarios, los tipos de sesión, el middleware y los redireccionamientos de login. También se creará un usuario inicial de carga de stock mediante el script de usuarios.
+Para soportar este flujo se agregará el rol `stock` al esquema de usuarios, los tipos de sesión (`src/lib/session.ts`) y el mapa de redirección de `src/app/login/page.tsx`. El middleware (`middleware.ts`) protegerá `/stock` permitiendo los roles `stock` y `admin`, y su `matcher` incluirá la ruta `/stock`. El usuario inicial de carga de stock se creará mediante el script de usuarios.
 
 ### Dashboard
 
@@ -157,7 +162,7 @@ Cuando la cantidad actual sea menor o igual al mínimo aplicable, la aplicación
 - Mantenerlo visible en una lista de alertas mientras continúe por debajo o igual al mínimo.
 - Resolver la alerta cuando el stock vuelva a superar el mínimo.
 
-La temporada aplicable se determinará automáticamente según la fecha local de La Cuadra:
+La temporada aplicable se determinará automáticamente según la fecha local de La Cuadra, usando la zona horaria `America/Argentina/Buenos_Aires` para evitar desfases al calcular el día vigente:
 
 - Todas las fechas serán de temporada baja por defecto.
 - El administrador marcará en un calendario únicamente las fechas o rangos de temporada alta.

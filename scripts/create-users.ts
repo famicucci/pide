@@ -12,7 +12,7 @@ const users = [
   { name: "Eliseo del Castillo", email: "eliseo@pide.local", password: "eliseo1234", role: "admin" },
   { name: "Diego Ramírez",       email: "diego@pide.local",  password: "diego1234",  role: "admin" },
   { name: "Francisco",           email: "francisco@pide.local", password: "francisco1234", role: "kitchen" },
-  { name: "Javier",              email: "javier@pide.local", password: "javier1234", role: "kitchen" },
+  { name: "Javier",              email: "javier@pide.local", password: "javier1234", role: "stock" },
   { name: "Maike",               email: "maike@pide.local",  password: "maike1234",  role: "waiter" },
   { name: "Rocío",               email: "rocio@pide.local",  password: "rocio1234",  role: "waiter" },
 ];
