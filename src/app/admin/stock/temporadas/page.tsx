@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { CalendarDays, Trash2 } from "lucide-react";
-import { AdminStockNav } from "@/components/stock/AdminStockNav";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -109,8 +108,6 @@ export default function StockSeasonsPage() {
           <p className="text-sm text-muted-foreground">Calendario de mínimos</p>
           <h1 className="text-2xl font-bold">Temporadas</h1>
         </div>
-
-        <AdminStockNav />
 
         <div className="mb-6 rounded-2xl border bg-white p-5">
           <div className="mb-4 flex items-start gap-3">

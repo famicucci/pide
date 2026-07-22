@@ -15,7 +15,10 @@ export function AdminStockNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="mb-6 flex gap-2 overflow-x-auto pb-1" aria-label="Secciones de stock">
+    <nav
+      className="scrollbar-hide flex h-14 items-center gap-2 overflow-x-auto"
+      aria-label="Secciones de stock"
+    >
       {links.map((link) => {
         const active = link.exact ? pathname === link.href : pathname.startsWith(link.href);
         return (

@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { CheckCircle2, PackageOpen, Printer, TriangleAlert } from "lucide-react";
-import { AdminStockNav } from "@/components/stock/AdminStockNav";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -60,8 +59,6 @@ export default function StockAlertsPage() {
             </Button>
           </div>
         </div>
-
-        <AdminStockNav />
 
         {loading ? (
           <div className="space-y-3">

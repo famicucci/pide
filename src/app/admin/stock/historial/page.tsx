@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { ArrowDown, ArrowUp, CalendarRange, History, Minus, X } from "lucide-react";
-import { AdminStockNav } from "@/components/stock/AdminStockNav";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -96,8 +95,6 @@ export default function StockHistoryPage() {
           <p className="text-sm text-muted-foreground">Auditoría de cambios</p>
           <h1 className="text-2xl font-bold">Historial de stock</h1>
         </div>
-
-        <AdminStockNav />
 
         <div className="mb-5 rounded-2xl border bg-white p-4">
           <button

@@ -12,7 +12,6 @@ import {
   SlidersHorizontal,
   TriangleAlert,
 } from "lucide-react";
-import { AdminStockNav } from "@/components/stock/AdminStockNav";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -197,8 +196,8 @@ export default function AdminStockPage() {
       <div className="mx-auto max-w-5xl">
         <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="text-sm text-muted-foreground">Gestión de inventario</p>
-            <h1 className="text-2xl font-bold">Stock</h1>
+            <p className="text-sm text-muted-foreground">Catálogo y configuración</p>
+            <h1 className="text-2xl font-bold">Artículos</h1>
           </div>
           <div className="flex gap-2">
             <Button asChild variant="outline" className="flex-1 sm:flex-none">
@@ -210,8 +209,6 @@ export default function AdminStockPage() {
             </Button>
           </div>
         </div>
-
-        <AdminStockNav />
 
         <div className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-3">
           <div className="rounded-2xl border bg-white p-4">
