@@ -104,11 +104,7 @@ export default function StockSeasonsPage() {
   return (
     <div className="p-4 sm:p-8">
       <div className="mx-auto max-w-5xl">
-        <div className="mb-5">
-          <p className="text-sm text-muted-foreground">Calendario de mínimos</p>
-          <h1 className="text-2xl font-bold">Temporadas</h1>
-        </div>
-
+        <h1 className="sr-only">Temporadas</h1>
         <div className="mb-6 rounded-2xl border bg-white p-5">
           <div className="mb-4 flex items-start gap-3">
             <CalendarDays className="mt-0.5 h-6 w-6 text-primary" />

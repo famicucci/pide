@@ -91,11 +91,7 @@ export default function StockHistoryPage() {
   return (
     <div className="p-4 sm:p-8">
       <div className="mx-auto max-w-5xl">
-        <div className="mb-5">
-          <p className="text-sm text-muted-foreground">Auditoría de cambios</p>
-          <h1 className="text-2xl font-bold">Historial de stock</h1>
-        </div>
-
+        <h1 className="sr-only">Historial de stock</h1>
         <div className="mb-5 rounded-2xl border bg-white p-4">
           <button
             onClick={() => setFiltersOpen((current) => !current)}

@@ -40,12 +40,8 @@ export default function StockAlertsPage() {
     <>
       <div className="p-4 print:hidden sm:p-8">
         <div className="mx-auto max-w-5xl">
-        <div className="mb-5 flex items-end justify-between gap-4">
-          <div>
-            <p className="text-sm text-muted-foreground">Control de mínimos</p>
-            <h1 className="text-2xl font-bold">Alertas de stock</h1>
-          </div>
-          <div className="flex flex-col gap-2 sm:flex-row">
+          <h1 className="sr-only">Alertas de stock</h1>
+          <div className="mb-5 flex justify-end gap-2">
             <Button
               variant="outline"
               onClick={() => window.print()}
@@ -58,7 +54,6 @@ export default function StockAlertsPage() {
               <Link href="/stock">Actualizar stock</Link>
             </Button>
           </div>
-        </div>
 
         {loading ? (
           <div className="space-y-3">

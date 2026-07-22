@@ -194,20 +194,15 @@ export default function AdminStockPage() {
   return (
     <div className="p-4 sm:p-8">
       <div className="mx-auto max-w-5xl">
-        <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="text-sm text-muted-foreground">Catálogo y configuración</p>
-            <h1 className="text-2xl font-bold">Artículos</h1>
-          </div>
-          <div className="flex gap-2">
-            <Button asChild variant="outline" className="flex-1 sm:flex-none">
-              <Link href="/stock">Actualizar stock</Link>
-            </Button>
-            <Button onClick={openNewItem} className="flex-1 sm:flex-none">
-              <PackagePlus className="mr-2 h-4 w-4" />
-              Nuevo artículo
-            </Button>
-          </div>
+        <h1 className="sr-only">Artículos</h1>
+        <div className="mb-5 flex justify-end gap-2">
+          <Button asChild variant="outline" className="flex-1 sm:flex-none">
+            <Link href="/stock">Actualizar stock</Link>
+          </Button>
+          <Button onClick={openNewItem} className="flex-1 sm:flex-none">
+            <PackagePlus className="mr-2 h-4 w-4" />
+            Nuevo artículo
+          </Button>
         </div>
 
         <div className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-3">
