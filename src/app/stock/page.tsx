@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -41,10 +41,12 @@ export default function StockPage() {
   const [loadError, setLoadError] = useState("");
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("all");
+  const [focusedQuantityId, setFocusedQuantityId] = useState<number | null>(null);
   const [quantities, setQuantities] = useState<Record<number, string>>({});
   const [notes, setNotes] = useState<Record<number, string>>({});
   const [notesOpen, setNotesOpen] = useState<Set<number>>(new Set());
   const [statuses, setStatuses] = useState<Record<number, SaveStatus>>({});
+  const savePointerItemId = useRef<number | null>(null);
   const [pendingConfirmation, setPendingConfirmation] = useState<{
     item: StockItem;
     quantity: number;
@@ -293,12 +295,32 @@ export default function StockPage() {
                       <label className="min-w-0 flex-1">
                         <span className="mb-1.5 block text-xs font-medium text-muted-foreground">
                           Cantidad actual
+                          {focusedQuantityId === item.id ? `: ${item.current_quantity}` : ""}
                         </span>
                         <Input
                           type="text"
                           inputMode="decimal"
                           value={value}
-                          onFocus={(event) => event.currentTarget.select()}
+                          onFocus={() => {
+                            setFocusedQuantityId(item.id);
+                            setQuantities((current) => ({ ...current, [item.id]: "" }));
+                            setStatuses((current) => ({ ...current, [item.id]: "idle" }));
+                          }}
+                          onBlur={(event) => {
+                            setFocusedQuantityId(null);
+                            const saveTarget =
+                              event.relatedTarget instanceof HTMLElement &&
+                              event.relatedTarget.dataset.stockSaveId === String(item.id);
+                            const saveViaPointer = savePointerItemId.current === item.id;
+                            savePointerItemId.current = null;
+
+                            if (saveTarget || saveViaPointer) return;
+                            setQuantities((current) => ({
+                              ...current,
+                              [item.id]: String(item.current_quantity),
+                            }));
+                            setStatuses((current) => ({ ...current, [item.id]: "idle" }));
+                          }}
                           onChange={(event) =>
                             setQuantities((current) => ({
                               ...current,
@@ -310,6 +332,10 @@ export default function StockPage() {
                         />
                       </label>
                       <Button
+                        data-stock-save-id={item.id}
+                        onPointerDown={() => {
+                          savePointerItemId.current = item.id;
+                        }}
                         onClick={() => saveItem(item)}
                         disabled={!changed || status === "saving" || parsedValue < 0}
                         className="h-12 min-w-28"
