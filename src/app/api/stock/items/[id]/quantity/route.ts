@@ -11,7 +11,6 @@ interface QuantityRow extends RowDataPacket {
 
 const updateSchema = z.object({
   quantity: z.number().nonnegative().max(99_999_999.99),
-  notes: z.string().trim().max(500).optional().default(""),
 });
 
 export async function PATCH(
@@ -59,15 +58,14 @@ export async function PATCH(
     );
     await connection.execute(
       `INSERT INTO stock_movements
-        (stock_item_id, movement_type, user_id, previous_quantity, new_quantity, difference, notes)
-       VALUES (?, 'adjustment', ?, ?, ?, ?, ?)`,
+        (stock_item_id, movement_type, user_id, previous_quantity, new_quantity, difference)
+       VALUES (?, 'adjustment', ?, ?, ?, ?)`,
       [
         itemId,
         session.userId,
         previousQuantity,
         newQuantity,
         difference,
-        parsed.data.notes || null,
       ]
     );
 

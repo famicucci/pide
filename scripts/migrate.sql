@@ -123,7 +123,6 @@ CREATE TABLE IF NOT EXISTS `stock_movements` (
   `previous_quantity` DECIMAL(10,2) NULL,
   `new_quantity` DECIMAL(10,2) NOT NULL,
   `difference` DECIMAL(10,2) NOT NULL,
-  `notes` VARCHAR(500) NULL,
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (`stock_item_id`) REFERENCES `stock_items`(`id`) ON DELETE RESTRICT,
   FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON DELETE RESTRICT,
@@ -131,6 +130,9 @@ CREATE TABLE IF NOT EXISTS `stock_movements` (
   INDEX `idx_stock_movements_user_created` (`user_id`, `created_at`),
   INDEX `idx_stock_movements_created` (`created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+ALTER TABLE `stock_movements`
+  DROP COLUMN IF EXISTS `notes`;
 
 CREATE TABLE IF NOT EXISTS `stock_high_season_dates` (
   `season_date` DATE PRIMARY KEY,

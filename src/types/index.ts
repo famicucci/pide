@@ -107,7 +107,6 @@ export interface StockMovement {
   previous_quantity: number | null;
   new_quantity: number;
   difference: number;
-  notes: string | null;
   created_at: string;
   item_name: string;
   item_brand: string | null;

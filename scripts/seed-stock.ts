@@ -181,8 +181,8 @@ async function seedStock() {
       );
       await db.execute(
         `INSERT INTO stock_movements
-          (stock_item_id, movement_type, user_id, previous_quantity, new_quantity, difference, notes)
-         VALUES (?, 'initial', ?, NULL, 0, 0, 'Carga inicial del catálogo')`,
+          (stock_item_id, movement_type, user_id, previous_quantity, new_quantity, difference)
+         VALUES (?, 'initial', ?, NULL, 0, 0)`,
         [result.insertId, users[0].id]
       );
       console.log(`  ✓ ${brand ? `${brand} · ` : ""}${name}`);

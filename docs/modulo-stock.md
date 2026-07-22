@@ -13,7 +13,6 @@ La primera versión busca reemplazar las planillas de papel que usa actualmente 
 - Permitir que administradores y usuarios de carga de stock consulten y modifiquen directamente la cantidad actual.
 - Aplicar cada cambio al guardarlo, sin borradores ni cierre de planilla.
 - Registrar automáticamente el responsable, fecha, valor anterior, valor nuevo y diferencia.
-- Permitir una observación opcional al realizar un cambio.
 - Dar a los administradores acceso a la gestión del catálogo y al historial.
 
 Quedan fuera del MVP:
@@ -31,7 +30,7 @@ Extender `scripts/migrate.ts` y mantener alineado `scripts/migrate.sql` con migr
 
 - `stock_categories`: nombre, orden y estado activo.
 - `stock_items`: categoría obligatoria, marca opcional, nombre, unidad, cantidad actual decimal, mínimos opcionales de temporada baja y alta, orden, estado activo y fecha de última modificación.
-- `stock_movements`: artículo, tipo de movimiento (`initial` o `adjustment`), responsable, valor anterior nullable, valor nuevo, diferencia, observación y fecha.
+- `stock_movements`: artículo, tipo de movimiento (`initial` o `adjustment`), responsable, valor anterior nullable, valor nuevo, diferencia y fecha.
 - `stock_high_season_dates`: una fila por fecha (`DATE` único) marcada como temporada alta. Toda fecha sin registro se considera temporada baja. Un rango seleccionado en la interfaz se persistirá como filas individuales.
 - Ampliar el `ENUM` de `role` en la tabla `users` para incluir `stock`. Esta migración es requisito para que el usuario de carga de stock pueda crearse.
 
@@ -79,7 +78,6 @@ Crear una pantalla móvil en `src/app/stock/page.tsx`, optimizada para recorrer 
 - Apertura automática del teclado numérico adecuado en dispositivos móviles.
 - Acción de guardado individual por artículo.
 - Indicación clara de cambios pendientes, guardado en curso, éxito o error.
-- Observación opcional para explicar un ajuste.
 - Búsqueda rápida por marca o producto.
 - Sin responsable ni fecha visibles: ambos datos se obtienen de la sesión y se reservan para el historial administrativo.
 
@@ -142,7 +140,7 @@ La creación y edición completa de un artículo se realizará en un formulario 
 
 - `/admin/stock/alertas` mostrará los artículos con stock bajo, incluyendo stock actual, mínimo aplicable, faltante, temporada activa y acceso rápido para actualizar stock.
 - `/admin/stock/historial` listará movimientos por fecha, responsable y artículo.
-- El detalle de un movimiento mostrará valor anterior, valor nuevo, diferencia y observación.
+- El detalle de un movimiento mostrará valor anterior, valor nuevo y diferencia.
 
 También se preparará un seed separado con los artículos legibles de las planillas. Los nombres o valores dudosos deberán revisarse antes de cargarlos.
 

@@ -261,11 +261,6 @@ export default function StockHistoryPage() {
                     <span className="text-muted-foreground">{movement.user_name}</span>
                     <span className="text-muted-foreground">{formatDate(movement.created_at)}</span>
                   </div>
-                  {movement.notes && (
-                    <p className="mt-2 rounded-lg bg-muted/60 px-3 py-2 text-sm text-muted-foreground">
-                      {movement.notes}
-                    </p>
-                  )}
                 </article>
               );
             })}

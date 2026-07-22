@@ -133,9 +133,9 @@ export async function POST(request: NextRequest) {
 
     await connection.execute(
       `INSERT INTO stock_movements
-        (stock_item_id, movement_type, user_id, previous_quantity, new_quantity, difference, notes)
-       VALUES (?, 'initial', ?, NULL, ?, ?, ?)`,
-      [result.insertId, session.userId, data.current_quantity, data.current_quantity, "Stock inicial"]
+        (stock_item_id, movement_type, user_id, previous_quantity, new_quantity, difference)
+       VALUES (?, 'initial', ?, NULL, ?, ?)`,
+      [result.insertId, session.userId, data.current_quantity, data.current_quantity]
     );
 
     await connection.commit();

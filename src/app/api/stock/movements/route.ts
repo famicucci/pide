@@ -13,7 +13,6 @@ interface MovementRow extends RowDataPacket {
   previous_quantity: string | null;
   new_quantity: string;
   difference: string;
-  notes: string | null;
   created_at: string;
   item_name: string;
   item_brand: string | null;
@@ -83,7 +82,7 @@ export async function GET(request: NextRequest) {
 
   const [rows] = await db.execute<MovementRow[]>(
     `SELECT m.id, m.stock_item_id, m.movement_type, m.user_id,
-            m.previous_quantity, m.new_quantity, m.difference, m.notes, m.created_at,
+            m.previous_quantity, m.new_quantity, m.difference, m.created_at,
             i.name AS item_name, i.brand AS item_brand, i.unit,
             u.name AS user_name
      FROM stock_movements m

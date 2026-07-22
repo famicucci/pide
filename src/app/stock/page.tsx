@@ -8,7 +8,6 @@ import {
   Check,
   ClipboardCheck,
   LogOut,
-  MessageSquarePlus,
   Search,
   TriangleAlert,
 } from "lucide-react";
@@ -43,8 +42,6 @@ export default function StockPage() {
   const [category, setCategory] = useState("all");
   const [focusedQuantityId, setFocusedQuantityId] = useState<number | null>(null);
   const [quantities, setQuantities] = useState<Record<number, string>>({});
-  const [notes, setNotes] = useState<Record<number, string>>({});
-  const [notesOpen, setNotesOpen] = useState<Set<number>>(new Set());
   const [statuses, setStatuses] = useState<Record<number, SaveStatus>>({});
   const savePointerItemId = useRef<number | null>(null);
   const [pendingConfirmation, setPendingConfirmation] = useState<{
@@ -129,7 +126,7 @@ export default function StockPage() {
     const response = await fetch(`/api/stock/items/${item.id}/quantity`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ quantity, notes: notes[item.id] ?? "" }),
+      body: JSON.stringify({ quantity }),
     });
 
     if (!response.ok) {
@@ -156,7 +153,6 @@ export default function StockPage() {
           }
         : current
     );
-    setNotes((current) => ({ ...current, [item.id]: "" }));
     setStatuses((current) => ({ ...current, [item.id]: "saved" }));
     window.setTimeout(
       () => setStatuses((current) => ({ ...current, [item.id]: "idle" })),
@@ -354,29 +350,6 @@ export default function StockPage() {
                       </p>
                     )}
 
-                    {notesOpen.has(item.id) ? (
-                      <div className="mt-3">
-                        <Input
-                          value={notes[item.id] ?? ""}
-                          onChange={(event) =>
-                            setNotes((current) => ({ ...current, [item.id]: event.target.value }))
-                          }
-                          placeholder="Motivo u observación (opcional)"
-                          maxLength={500}
-                          className="h-11"
-                        />
-                      </div>
-                    ) : (
-                      <button
-                        onClick={() =>
-                          setNotesOpen((current) => new Set(current).add(item.id))
-                        }
-                        className="mt-3 flex min-h-10 items-center gap-2 text-sm font-medium text-muted-foreground"
-                      >
-                        <MessageSquarePlus className="h-4 w-4" />
-                        Agregar observación
-                      </button>
-                    )}
                   </article>
                 );
               })}
