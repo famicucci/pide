@@ -42,6 +42,7 @@ export async function GET(request: NextRequest) {
   const userId = Number(params.get("user_id"));
   const from = params.get("from");
   const to = params.get("to");
+  const since = params.get("since");
 
   if (
     (from && !isValidDate(from)) ||
@@ -49,6 +50,11 @@ export async function GET(request: NextRequest) {
     (from && to && from > to)
   ) {
     return NextResponse.json({ error: "Invalid date range" }, { status: 400 });
+  }
+
+  const sinceDate = since ? new Date(since) : null;
+  if (since && (!sinceDate || Number.isNaN(sinceDate.getTime()))) {
+    return NextResponse.json({ error: "Invalid since timestamp" }, { status: 400 });
   }
 
   const conditions: string[] = [];
@@ -68,6 +74,10 @@ export async function GET(request: NextRequest) {
   if (to) {
     conditions.push("m.created_at < ?");
     values.push(stockDateBoundaryUtc(to, true));
+  }
+  if (sinceDate) {
+    conditions.push("m.created_at >= ?");
+    values.push(sinceDate.toISOString().slice(0, 19).replace("T", " "));
   }
   const where = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
 

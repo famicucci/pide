@@ -28,6 +28,11 @@ function shiftDate(date: string, days: number) {
   return value.toISOString().slice(0, 10);
 }
 
+interface ActiveFilter {
+  label: string;
+  params: Record<string, string>;
+}
+
 export default function StockHistoryPage() {
   const [movements, setMovements] = useState<StockMovement[]>([]);
   const [total, setTotal] = useState(0);
@@ -36,29 +41,32 @@ export default function StockHistoryPage() {
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
-  const [appliedFrom, setAppliedFrom] = useState("");
-  const [appliedTo, setAppliedTo] = useState("");
+  const [activeFilter, setActiveFilter] = useState<ActiveFilter | null>(null);
   const [filterError, setFilterError] = useState("");
 
-  const load = useCallback(async (offset = 0) => {
-    const params = new URLSearchParams({ limit: "50", offset: String(offset) });
-    if (appliedFrom) params.set("from", appliedFrom);
-    if (appliedTo) params.set("to", appliedTo);
-    const response = await fetch(`/api/stock/movements?${params}`);
+  const load = useCallback(async (offset: number, params: Record<string, string>) => {
+    const search = new URLSearchParams({ limit: "50", offset: String(offset), ...params });
+    const response = await fetch(`/api/stock/movements?${search}`);
     if (!response.ok) return;
     const payload = (await response.json()) as MovementResponse;
     setTotal(payload.total);
     setMovements((current) => (offset === 0 ? payload.movements : [...current, ...payload.movements]));
-  }, [appliedFrom, appliedTo]);
+  }, []);
 
   useEffect(() => {
-    load().finally(() => setLoading(false));
+    load(0, {}).finally(() => setLoading(false));
   }, [load]);
 
   async function loadMore() {
     setLoadingMore(true);
-    await load(movements.length);
+    await load(movements.length, activeFilter?.params ?? {});
     setLoadingMore(false);
+  }
+
+  function runFilter(filter: ActiveFilter | null) {
+    setActiveFilter(filter);
+    setLoading(true);
+    load(0, filter?.params ?? {}).finally(() => setLoading(false));
   }
 
   function applyRange(nextFrom = from, nextTo = to) {
@@ -69,9 +77,15 @@ export default function StockHistoryPage() {
     }
     setFrom(nextFrom);
     setTo(nextTo);
-    setLoading(true);
-    setAppliedFrom(nextFrom);
-    setAppliedTo(nextTo);
+    runFilter({
+      label: `${nextFrom.split("-").reverse().join("/")} – ${nextTo.split("-").reverse().join("/")}`,
+      params: { from: nextFrom, to: nextTo },
+    });
+  }
+
+  function applyLast24h() {
+    const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    runFilter({ label: "Últimas 24 hs", params: { since } });
   }
 
   function applyQuickRange(days: number) {
@@ -83,9 +97,7 @@ export default function StockHistoryPage() {
     setFrom("");
     setTo("");
     setFilterError("");
-    setLoading(true);
-    setAppliedFrom("");
-    setAppliedTo("");
+    runFilter(null);
   }
 
   return (
@@ -101,23 +113,19 @@ export default function StockHistoryPage() {
               <CalendarRange className="h-5 w-5 text-primary" />
               Filtrar por fecha
             </span>
-            {appliedFrom && appliedTo ? (
-              <span className="text-sm text-muted-foreground">
-                {appliedFrom.split("-").reverse().join("/")} – {appliedTo.split("-").reverse().join("/")}
-              </span>
-            ) : (
-              <span className="text-sm text-muted-foreground">Todos</span>
-            )}
+            <span className="text-sm text-muted-foreground">
+              {activeFilter ? activeFilter.label : "Todos"}
+            </span>
           </button>
 
           {filtersOpen && (
             <div className="mt-4 border-t pt-4">
               <div className="mb-4 flex gap-2 overflow-x-auto pb-1">
                 <button
-                  onClick={() => applyQuickRange(1)}
+                  onClick={applyLast24h}
                   className="shrink-0 rounded-full bg-muted px-4 py-2 text-sm font-medium"
                 >
-                  Hoy
+                  Últimas 24 hs
                 </button>
                 <button
                   onClick={() => applyQuickRange(7)}
@@ -151,7 +159,7 @@ export default function StockHistoryPage() {
               </div>
 
               {filterError && <p className="mt-3 text-sm font-medium text-destructive">{filterError}</p>}
-              {appliedFrom && appliedTo && (
+              {activeFilter && (
                 <button
                   onClick={clearRange}
                   className="mt-3 flex min-h-10 items-center gap-1 text-sm font-medium text-muted-foreground hover:text-foreground"
@@ -173,7 +181,7 @@ export default function StockHistoryPage() {
           <div className="rounded-2xl border bg-white p-10 text-center text-muted-foreground">
             <History className="mx-auto mb-3 h-9 w-9" />
             <p>
-              {appliedFrom
+              {activeFilter
                 ? "No hay movimientos dentro del rango seleccionado."
                 : "Todavía no hay movimientos de stock."}
             </p>
