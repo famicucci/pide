@@ -39,6 +39,7 @@ export default function StockHistoryPage() {
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [customRangeOpen, setCustomRangeOpen] = useState(false);
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [activeFilter, setActiveFilter] = useState<ActiveFilter | null>(null);
@@ -85,11 +86,14 @@ export default function StockHistoryPage() {
 
   function applyLast24h() {
     const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+    setCustomRangeOpen(false);
+    setFilterError("");
     runFilter({ label: "Últimas 24 hs", params: { since } });
   }
 
   function applyQuickRange(days: number) {
     const today = getStockLocalDate();
+    setCustomRangeOpen(false);
     applyRange(shiftDate(today, -(days - 1)), today);
   }
 
@@ -139,26 +143,42 @@ export default function StockHistoryPage() {
                 >
                   Últimos 30 días
                 </button>
+                <button
+                  onClick={() => {
+                    setCustomRangeOpen((current) => !current);
+                    setFilterError("");
+                  }}
+                  aria-expanded={customRangeOpen}
+                  className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium ${
+                    customRangeOpen ? "bg-primary text-primary-foreground" : "bg-muted"
+                  }`}
+                >
+                  Rango personalizado
+                </button>
               </div>
 
-              <div className="grid gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
-                <label className="space-y-1">
-                  <Label>Desde</Label>
-                  <Input type="date" value={from} onChange={(event) => setFrom(event.target.value)} />
-                </label>
-                <label className="space-y-1">
-                  <Label>Hasta</Label>
-                  <Input
-                    type="date"
-                    min={from}
-                    value={to}
-                    onChange={(event) => setTo(event.target.value)}
-                  />
-                </label>
-                <Button onClick={() => applyRange()}>Aplicar</Button>
-              </div>
+              {customRangeOpen && (
+                <>
+                  <div className="grid gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
+                    <label className="space-y-1">
+                      <Label>Desde</Label>
+                      <Input type="date" value={from} onChange={(event) => setFrom(event.target.value)} />
+                    </label>
+                    <label className="space-y-1">
+                      <Label>Hasta</Label>
+                      <Input
+                        type="date"
+                        min={from}
+                        value={to}
+                        onChange={(event) => setTo(event.target.value)}
+                      />
+                    </label>
+                    <Button onClick={() => applyRange()}>Aplicar</Button>
+                  </div>
 
-              {filterError && <p className="mt-3 text-sm font-medium text-destructive">{filterError}</p>}
+                  {filterError && <p className="mt-3 text-sm font-medium text-destructive">{filterError}</p>}
+                </>
+              )}
               {activeFilter && (
                 <button
                   onClick={clearRange}
