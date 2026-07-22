@@ -265,24 +265,28 @@ export default function StockPage() {
                 return (
                   <article
                     key={item.id}
-                    className={`rounded-2xl border bg-white p-4 shadow-sm ${
+                    className={`relative rounded-2xl border bg-white p-4 shadow-sm ${
                       item.is_low_stock ? "border-amber-300" : ""
                     }`}
                   >
-                    <div className="mb-3 flex items-start justify-between gap-3">
-                      <div className="min-w-0">
-                        {item.brand && (
-                          <p className="truncate text-xs font-semibold uppercase tracking-wide text-primary">
-                            {item.brand}
-                          </p>
-                        )}
-                        <h3 className="text-base font-bold leading-tight">{item.name}</h3>
-                        <p className="mt-1 text-xs text-muted-foreground">
-                          Unidad: {item.unit_label} ({item.unit_abbreviation})
+                    <div className="mb-3 min-w-0 pr-28">
+                      {item.brand && (
+                        <p className="truncate text-xs font-semibold uppercase tracking-wide text-primary">
+                          {item.brand}
                         </p>
-                      </div>
+                      )}
+                      <h3 className="text-base font-bold leading-tight">{item.name}</h3>
+                    </div>
+                    <div className="absolute right-4 top-4 flex flex-col items-end gap-1">
+                      <span
+                        aria-label={`Unidad: ${item.unit_label}`}
+                        title={item.unit_label}
+                        className="rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground"
+                      >
+                        {item.unit_abbreviation}
+                      </span>
                       {item.is_low_stock && (
-                        <span className="flex shrink-0 items-center gap-1 rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-900">
+                        <span className="flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-900">
                           <TriangleAlert className="h-3.5 w-3.5" />
                           Stock bajo
                         </span>
