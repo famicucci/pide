@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { CheckCircle2, PackageOpen, TriangleAlert } from "lucide-react";
+import { CheckCircle2, PackageOpen, Printer, TriangleAlert } from "lucide-react";
 import { AdminStockNav } from "@/components/stock/AdminStockNav";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -38,16 +38,27 @@ export default function StockAlertsPage() {
   }, []);
 
   return (
-    <div className="p-4 sm:p-8">
-      <div className="mx-auto max-w-5xl">
+    <>
+      <div className="p-4 print:hidden sm:p-8">
+        <div className="mx-auto max-w-5xl">
         <div className="mb-5 flex items-end justify-between gap-4">
           <div>
             <p className="text-sm text-muted-foreground">Control de mínimos</p>
             <h1 className="text-2xl font-bold">Alertas de stock</h1>
           </div>
-          <Button asChild>
-            <Link href="/stock">Actualizar stock</Link>
-          </Button>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <Button
+              variant="outline"
+              onClick={() => window.print()}
+              disabled={!data?.items.length}
+            >
+              <Printer className="h-4 w-4" />
+              Imprimir reporte
+            </Button>
+            <Button asChild>
+              <Link href="/stock">Actualizar stock</Link>
+            </Button>
+          </div>
         </div>
 
         <AdminStockNav />
@@ -120,7 +131,62 @@ export default function StockAlertsPage() {
             </div>
           </>
         )}
+        </div>
       </div>
-    </div>
+
+      {data && data.items.length > 0 && (
+        <section className="stock-print-report hidden bg-white text-black print:block">
+          <header className="mb-6 border-b-2 border-black pb-4">
+            <p className="text-sm font-bold uppercase tracking-wider">La Cuadra · Pide</p>
+            <h1 className="mt-1 text-2xl font-bold">Reporte de stock bajo</h1>
+            <div className="mt-2 flex justify-between text-sm">
+              <span>
+                Fecha: {data.date.split("-").reverse().join("/")}
+              </span>
+              <span>Temporada: {data.season === "high" ? "Alta" : "Baja"}</span>
+            </div>
+          </header>
+
+          <p className="mb-4 text-sm">
+            {data.count} {data.count === 1 ? "artículo alcanzó" : "artículos alcanzaron"} el
+            stock mínimo configurado.
+          </p>
+
+          <table className="w-full border-collapse text-left text-sm">
+            <thead>
+              <tr className="border-b-2 border-black">
+                <th className="py-2 pr-3">Artículo</th>
+                <th className="py-2 pr-3">Categoría</th>
+                <th className="py-2 pr-3 text-right">Actual</th>
+                <th className="py-2 pr-3 text-right">Mínimo</th>
+                <th className="py-2 text-right">Faltante</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.items.map((item) => (
+                <tr key={item.id} className="border-b border-gray-300">
+                  <td className="py-2.5 pr-3">
+                    <span className="font-semibold">
+                      {item.brand ? `${item.brand} · ` : ""}
+                      {item.name}
+                    </span>
+                  </td>
+                  <td className="py-2.5 pr-3">{item.category_name}</td>
+                  <td className="py-2.5 pr-3 text-right">
+                    {item.current_quantity} {item.unit_abbreviation}
+                  </td>
+                  <td className="py-2.5 pr-3 text-right">
+                    {item.active_minimum} {item.unit_abbreviation}
+                  </td>
+                  <td className="py-2.5 text-right font-semibold">
+                    {item.shortage} {item.unit_abbreviation}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </section>
+      )}
+    </>
   );
 }

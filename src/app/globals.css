@@ -103,3 +103,27 @@ body {
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
+@media print {
+  @page {
+    margin: 14mm;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  .stock-print-report,
+  .stock-print-report * {
+    visibility: visible;
+  }
+
+  .stock-print-report {
+    display: block !important;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    background: white;
+    color: black;
+  }
+}
