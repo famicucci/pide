@@ -7,6 +7,7 @@ import {
   ArrowLeft,
   Check,
   ClipboardCheck,
+  Loader2,
   LogOut,
   Search,
   TriangleAlert,
@@ -340,12 +341,22 @@ export default function StockPage() {
                         }}
                         onClick={() => saveItem(item)}
                         disabled={!changed || status === "saving" || parsedValue < 0}
-                        className="h-12 min-w-28"
+                        className="h-12 w-28 shrink-0"
                       >
                         {status === "saving"
-                          ? "Guardando..."
+                          ? (
+                              <>
+                                <Loader2 className="h-5 w-5 animate-spin" aria-hidden="true" />
+                                <span className="sr-only">Guardando</span>
+                              </>
+                            )
                           : status === "saved"
-                            ? <><Check className="mr-1 h-4 w-4" /> Guardado</>
+                            ? (
+                                <>
+                                  <Check className="h-5 w-5" aria-hidden="true" />
+                                  <span className="sr-only">Guardado</span>
+                                </>
+                              )
                             : "Guardar"}
                       </Button>
                     </div>
