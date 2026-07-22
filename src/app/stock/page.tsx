@@ -195,17 +195,19 @@ export default function StockPage() {
           </button>
         </div>
 
-        <div className="mx-auto max-w-3xl space-y-3 px-4 pb-3">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder="Buscar marca o producto"
-              className="h-12 bg-muted/50 pl-10 text-base"
-            />
+        <div className="mx-auto max-w-3xl space-y-3 pb-3">
+          <div className="px-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Buscar marca o producto"
+                className="h-12 bg-muted/50 pl-10 text-base"
+              />
+            </div>
           </div>
-          <div className="flex gap-2 overflow-x-auto pb-1">
+          <div className="scrollbar-hide flex gap-2 overflow-x-auto pb-1 sm:px-4">
             <button
               onClick={() => setCategory("all")}
               className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium ${
