@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { CheckCircle2, PackageOpen, Printer, TriangleAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -41,19 +40,6 @@ export default function StockAlertsPage() {
       <div className="p-4 print:hidden sm:p-8">
         <div className="mx-auto max-w-5xl">
           <h1 className="sr-only">Alertas de stock</h1>
-          <div className="mb-5 flex justify-end gap-2">
-            <Button
-              variant="outline"
-              onClick={() => window.print()}
-              disabled={!data?.items.length}
-            >
-              <Printer className="h-4 w-4" />
-              Imprimir reporte
-            </Button>
-            <Button asChild>
-              <Link href="/stock">Actualizar stock</Link>
-            </Button>
-          </div>
 
         {loading ? (
           <div className="space-y-3">
@@ -73,16 +59,28 @@ export default function StockAlertsPage() {
         ) : (
           <>
             <div className="mb-4 rounded-2xl border border-amber-300 bg-amber-50 p-4">
-              <div className="flex items-center gap-3">
-                <TriangleAlert className="h-6 w-6 shrink-0 text-amber-800" />
-                <div>
-                  <p className="font-bold">
-                    {data.count} {data.count === 1 ? "artículo necesita" : "artículos necesitan"} atención
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    Mínimos de temporada {data.season === "high" ? "alta" : "baja"}.
-                  </p>
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <TriangleAlert className="h-6 w-6 shrink-0 text-amber-800" />
+                  <div>
+                    <p className="font-bold">
+                      {data.count} {data.count === 1 ? "artículo necesita" : "artículos necesitan"} atención
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Mínimos de temporada {data.season === "high" ? "alta" : "baja"}.
+                    </p>
+                  </div>
                 </div>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={() => window.print()}
+                  aria-label="Imprimir reporte"
+                  title="Imprimir reporte"
+                  className="shrink-0 rounded-2xl bg-white"
+                >
+                  <Printer className="h-4 w-4" />
+                </Button>
               </div>
             </div>
 
