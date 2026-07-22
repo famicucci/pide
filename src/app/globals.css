@@ -85,8 +85,10 @@
   --font-logo: var(--font-anton), Impact, "Arial Narrow", sans-serif;
 }
 
-* {
-  border-color: hsl(var(--border));
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
 }
 
 body {
