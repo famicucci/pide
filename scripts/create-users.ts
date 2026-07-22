@@ -31,7 +31,13 @@ async function createUsers() {
   for (const user of users) {
     const hash = await bcrypt.hash(user.password, 10);
     await db.execute(
-      "INSERT IGNORE INTO users (name, email, password_hash, role) VALUES (?, ?, ?, ?)",
+      `INSERT INTO users (name, email, password_hash, role)
+       VALUES (?, ?, ?, ?)
+       ON DUPLICATE KEY UPDATE
+         name = VALUES(name),
+         password_hash = VALUES(password_hash),
+         role = VALUES(role),
+         active = 1`,
       [user.name, user.email, hash, user.role]
     );
     console.log(`  ✓ ${user.name} (${user.role}) — ${user.email} / ${user.password}`);

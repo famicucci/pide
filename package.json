@@ -8,6 +8,7 @@
     "start": "next start",
     "migrate": "tsx scripts/migrate.ts",
     "seed": "tsx scripts/seed.ts",
+    "seed-stock": "tsx scripts/seed-stock.ts",
     "create-users": "tsx scripts/create-users.ts",
     "setup-menu": "tsx scripts/setup-menu.ts"
   },

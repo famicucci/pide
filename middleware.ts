@@ -4,6 +4,7 @@ import { type SessionData } from "@/lib/session";
 
 const ROLE_ROUTES: Record<string, SessionData["role"][]> = {
   "/admin": ["admin"],
+  "/stock": ["stock", "admin"],
   "/cocina": ["kitchen", "admin"],
   "/mozo": ["waiter", "admin"],
 };
@@ -37,5 +38,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/cocina", "/mozo"],
+  matcher: ["/admin/:path*", "/stock/:path*", "/cocina", "/mozo"],
 };

@@ -1,20 +1,28 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, UtensilsCrossed, TableProperties, LogOut, Menu } from "lucide-react";
+import { LayoutDashboard, LogOut, Menu, PackageOpen } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Logo } from "@/components/ui/logo";
 
 const NAV = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
-  { href: "/admin/menu", label: "Menú", icon: UtensilsCrossed },
-  { href: "/admin/mesas", label: "Mesas", icon: TableProperties },
+  { href: "/admin/stock", label: "Stock", icon: PackageOpen },
+  // Menú y Mesas quedan fuera de la navegación durante el MVP de stock.
 ];
 
-function NavLinks({ pathname, onNavigate }: { pathname: string; onNavigate?: () => void }) {
+function NavLinks({
+  pathname,
+  lowStockCount,
+  onNavigate,
+}: {
+  pathname: string;
+  lowStockCount: number;
+  onNavigate?: () => void;
+}) {
   const router = useRouter();
 
   async function handleLogout() {
@@ -45,6 +53,11 @@ function NavLinks({ pathname, onNavigate }: { pathname: string; onNavigate?: () 
             >
               <item.icon className="h-4 w-4" />
               {item.label}
+              {item.href === "/admin/stock" && lowStockCount > 0 && (
+                <span className="ml-auto rounded-full bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-900">
+                  {lowStockCount}
+                </span>
+              )}
             </Link>
           );
         })}
@@ -65,12 +78,20 @@ function NavLinks({ pathname, onNavigate }: { pathname: string; onNavigate?: () 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [lowStockCount, setLowStockCount] = useState(0);
+
+  useEffect(() => {
+    fetch("/api/stock/alerts")
+      .then((response) => (response.ok ? response.json() : null))
+      .then((data) => setLowStockCount(data?.count ?? 0))
+      .catch(() => setLowStockCount(0));
+  }, [pathname]);
 
   return (
     <div className="flex min-h-screen">
       {/* Desktop sidebar */}
       <aside className="hidden md:flex w-56 border-r bg-white flex-col shrink-0">
-        <NavLinks pathname={pathname} />
+        <NavLinks pathname={pathname} lowStockCount={lowStockCount} />
       </aside>
 
       {/* Mobile top bar */}
@@ -82,7 +103,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             </button>
           </SheetTrigger>
           <SheetContent side="left" className="p-0 w-64">
-            <NavLinks pathname={pathname} onNavigate={() => setOpen(false)} />
+            <NavLinks
+              pathname={pathname}
+              lowStockCount={lowStockCount}
+              onNavigate={() => setOpen(false)}
+            />
           </SheetContent>
         </Sheet>
         <Logo className="text-xl" />

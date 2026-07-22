@@ -4,6 +4,7 @@ import { z } from "zod";
 import db from "@/lib/db";
 import { getSession } from "@/lib/session";
 import { RowDataPacket } from "mysql2";
+import type { UserRole } from "@/types";
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -15,7 +16,7 @@ interface UserRow extends RowDataPacket {
   name: string;
   email: string;
   password_hash: string;
-  role: "admin" | "waiter" | "kitchen";
+  role: UserRole;
   active: number;
 }
 

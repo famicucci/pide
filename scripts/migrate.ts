@@ -71,8 +71,61 @@ const statements = [
     \`name\` VARCHAR(100) NOT NULL,
     \`email\` VARCHAR(150) NOT NULL UNIQUE,
     \`password_hash\` VARCHAR(255) NOT NULL,
-    \`role\` ENUM('admin','waiter','kitchen') NOT NULL,
+    \`role\` ENUM('admin','waiter','kitchen','stock') NOT NULL,
     \`active\` TINYINT(1) NOT NULL DEFAULT 1
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+  `ALTER TABLE \`users\`
+    MODIFY COLUMN \`role\` ENUM('admin','waiter','kitchen','stock') NOT NULL`,
+
+  `CREATE TABLE IF NOT EXISTS \`stock_categories\` (
+    \`id\` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    \`name\` VARCHAR(100) NOT NULL,
+    \`sort_order\` INT NOT NULL DEFAULT 0,
+    \`active\` TINYINT(1) NOT NULL DEFAULT 1,
+    UNIQUE KEY \`uq_stock_categories_name\` (\`name\`)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+  `CREATE TABLE IF NOT EXISTS \`stock_items\` (
+    \`id\` INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    \`category_id\` INT UNSIGNED NOT NULL,
+    \`brand\` VARCHAR(100) NULL,
+    \`name\` VARCHAR(150) NOT NULL,
+    \`unit\` VARCHAR(50) NOT NULL,
+    \`current_quantity\` DECIMAL(10,2) NOT NULL DEFAULT 0,
+    \`minimum_low_season\` DECIMAL(10,2) NULL,
+    \`minimum_high_season\` DECIMAL(10,2) NULL,
+    \`sort_order\` INT NOT NULL DEFAULT 0,
+    \`active\` TINYINT(1) NOT NULL DEFAULT 1,
+    \`created_at\` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    \`updated_at\` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (\`category_id\`) REFERENCES \`stock_categories\`(\`id\`) ON DELETE RESTRICT,
+    INDEX \`idx_stock_items_category_active\` (\`category_id\`, \`active\`),
+    INDEX \`idx_stock_items_name_brand\` (\`name\`, \`brand\`)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+  `CREATE TABLE IF NOT EXISTS \`stock_movements\` (
+    \`id\` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    \`stock_item_id\` INT UNSIGNED NOT NULL,
+    \`movement_type\` ENUM('initial','adjustment') NOT NULL,
+    \`user_id\` INT UNSIGNED NOT NULL,
+    \`previous_quantity\` DECIMAL(10,2) NULL,
+    \`new_quantity\` DECIMAL(10,2) NOT NULL,
+    \`difference\` DECIMAL(10,2) NOT NULL,
+    \`notes\` VARCHAR(500) NULL,
+    \`created_at\` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (\`stock_item_id\`) REFERENCES \`stock_items\`(\`id\`) ON DELETE RESTRICT,
+    FOREIGN KEY (\`user_id\`) REFERENCES \`users\`(\`id\`) ON DELETE RESTRICT,
+    INDEX \`idx_stock_movements_item_created\` (\`stock_item_id\`, \`created_at\`),
+    INDEX \`idx_stock_movements_user_created\` (\`user_id\`, \`created_at\`),
+    INDEX \`idx_stock_movements_created\` (\`created_at\`)
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
+
+  `CREATE TABLE IF NOT EXISTS \`stock_high_season_dates\` (
+    \`season_date\` DATE PRIMARY KEY,
+    \`created_by\` INT UNSIGNED NOT NULL,
+    \`created_at\` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (\`created_by\`) REFERENCES \`users\`(\`id\`) ON DELETE RESTRICT
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 ];
 

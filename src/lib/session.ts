@@ -1,10 +1,11 @@
 import { getIronSession, type SessionOptions } from "iron-session";
 import { cookies } from "next/headers";
+import type { UserRole } from "@/types";
 
 export interface SessionData {
   userId: number;
   name: string;
-  role: "admin" | "waiter" | "kitchen";
+  role: UserRole;
 }
 
 const sessionOptions: SessionOptions = {
