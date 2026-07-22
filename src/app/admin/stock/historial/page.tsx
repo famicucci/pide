@@ -30,6 +30,7 @@ function shiftDate(date: string, days: number) {
 
 interface ActiveFilter {
   label: string;
+  lines?: [string, string];
   params: Record<string, string>;
 }
 
@@ -78,8 +79,11 @@ export default function StockHistoryPage() {
     }
     setFrom(nextFrom);
     setTo(nextTo);
+    const formattedFrom = nextFrom.split("-").reverse().join("/");
+    const formattedTo = nextTo.split("-").reverse().join("/");
     runFilter({
-      label: `${nextFrom.split("-").reverse().join("/")} – ${nextTo.split("-").reverse().join("/")}`,
+      label: `${formattedFrom} ${formattedTo}`,
+      lines: [formattedFrom, formattedTo],
       params: { from: nextFrom, to: nextTo },
     });
   }
@@ -113,12 +117,19 @@ export default function StockHistoryPage() {
             onClick={() => setFiltersOpen((current) => !current)}
             className="flex min-h-11 w-full items-center justify-between gap-3 text-left"
           >
-            <span className="flex items-center gap-2 font-semibold">
+            <span className="flex shrink-0 items-center gap-2 whitespace-nowrap font-semibold">
               <CalendarRange className="h-5 w-5 text-primary" />
               Filtrar por fecha
             </span>
-            <span className="text-sm text-muted-foreground">
-              {activeFilter ? activeFilter.label : "Todos"}
+            <span className="min-w-0 text-right text-xs leading-tight text-muted-foreground">
+              {activeFilter?.lines ? (
+                <span className="flex flex-col">
+                  <span>{activeFilter.lines[0]}</span>
+                  <span>{activeFilter.lines[1]}</span>
+                </span>
+              ) : (
+                activeFilter?.label ?? "Todos"
+              )}
             </span>
           </button>
 
