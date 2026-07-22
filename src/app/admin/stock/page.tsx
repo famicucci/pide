@@ -336,11 +336,11 @@ export default function AdminStockPage() {
       </div>
 
       <Dialog open={itemDialog} onOpenChange={setItemDialog}>
-        <DialogContent className="max-h-[calc(100vh-2rem)] overflow-y-auto sm:max-w-xl">
-          <DialogHeader>
+        <DialogContent className="inset-0 left-0 top-0 flex h-[100dvh] w-screen max-w-none translate-x-0 translate-y-0 flex-col gap-0 overflow-hidden rounded-none border-0 p-0 sm:left-[50%] sm:top-[50%] sm:grid sm:h-auto sm:max-h-[calc(100vh-2rem)] sm:w-full sm:max-w-xl sm:translate-x-[-50%] sm:translate-y-[-50%] sm:gap-4 sm:overflow-y-auto sm:rounded-2xl sm:border sm:p-6">
+          <DialogHeader className="shrink-0 border-b px-5 py-5 text-left sm:border-0 sm:p-0">
             <DialogTitle>{editingItem ? "Editar artículo" : "Nuevo artículo"}</DialogTitle>
           </DialogHeader>
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid flex-1 gap-4 overflow-y-auto px-5 py-5 sm:grid-cols-2 sm:overflow-visible sm:p-0">
             <label className="space-y-1 sm:col-span-2">
               <Label>Categoría</Label>
               <select
@@ -445,8 +445,12 @@ export default function AdminStockPage() {
               />
             </label>
           </div>
-          {formError && <p className="text-sm font-medium text-destructive">{formError}</p>}
-          <DialogFooter>
+          {formError && (
+            <p className="px-5 pb-3 text-sm font-medium text-destructive sm:p-0">
+              {formError}
+            </p>
+          )}
+          <DialogFooter className="grid shrink-0 grid-cols-2 border-t bg-white px-5 py-4 sm:flex sm:border-0 sm:p-0">
             <Button variant="outline" onClick={() => setItemDialog(false)}>Cancelar</Button>
             <Button
               onClick={saveItem}
