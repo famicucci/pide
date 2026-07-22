@@ -13,6 +13,13 @@ import {
   TriangleAlert,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Logo } from "@/components/ui/logo";
@@ -38,6 +45,10 @@ export default function StockPage() {
   const [notes, setNotes] = useState<Record<number, string>>({});
   const [notesOpen, setNotesOpen] = useState<Set<number>>(new Set());
   const [statuses, setStatuses] = useState<Record<number, SaveStatus>>({});
+  const [pendingConfirmation, setPendingConfirmation] = useState<{
+    item: StockItem;
+    quantity: number;
+  } | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -100,6 +111,18 @@ export default function StockPage() {
       return;
     }
 
+    const isUnusual =
+      item.current_quantity > 0 &&
+      (quantity >= item.current_quantity * 3 || quantity <= item.current_quantity * 0.2);
+    if (isUnusual) {
+      setPendingConfirmation({ item, quantity });
+      return;
+    }
+
+    await persistItem(item, quantity);
+  }
+
+  async function persistItem(item: StockItem, quantity: number) {
     setStatuses((current) => ({ ...current, [item.id]: "saving" }));
     const response = await fetch(`/api/stock/items/${item.id}/quantity`, {
       method: "PATCH",
@@ -333,6 +356,77 @@ export default function StockPage() {
           ))
         )}
       </main>
+
+      <Dialog
+        open={pendingConfirmation !== null}
+        onOpenChange={(open) => {
+          if (!open) setPendingConfirmation(null);
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <div className="mb-2 flex h-11 w-11 items-center justify-center rounded-full bg-amber-100 text-amber-800">
+              <TriangleAlert className="h-5 w-5" />
+            </div>
+            <DialogTitle>Revisá la cantidad</DialogTitle>
+          </DialogHeader>
+          {pendingConfirmation && (
+            <div className="space-y-3">
+              <p className="text-sm text-muted-foreground">
+                Estás por cambiar{" "}
+                <strong className="text-foreground">
+                  {pendingConfirmation.item.brand
+                    ? `${pendingConfirmation.item.brand} · `
+                    : ""}
+                  {pendingConfirmation.item.name}
+                </strong>{" "}
+                de{" "}
+                <strong className="text-foreground">
+                  {pendingConfirmation.item.current_quantity}{" "}
+                  {pendingConfirmation.item.unit_abbreviation}
+                </strong>{" "}
+                a{" "}
+                <strong className="text-foreground">
+                  {pendingConfirmation.quantity}{" "}
+                  {pendingConfirmation.item.unit_abbreviation}
+                </strong>
+                .
+              </p>
+              <div className="rounded-xl bg-amber-50 px-4 py-3 text-sm text-amber-950">
+                Diferencia:{" "}
+                <strong>
+                  {pendingConfirmation.quantity - pendingConfirmation.item.current_quantity > 0
+                    ? "+"
+                    : ""}
+                  {Number(
+                    (
+                      pendingConfirmation.quantity -
+                      pendingConfirmation.item.current_quantity
+                    ).toFixed(2)
+                  )}{" "}
+                  {pendingConfirmation.item.unit_abbreviation}
+                </strong>
+              </div>
+              <p className="text-sm font-medium">¿Querés continuar?</p>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPendingConfirmation(null)}>
+              Cancelar
+            </Button>
+            <Button
+              onClick={() => {
+                if (!pendingConfirmation) return;
+                const { item, quantity } = pendingConfirmation;
+                setPendingConfirmation(null);
+                void persistItem(item, quantity);
+              }}
+            >
+              Sí, guardar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
