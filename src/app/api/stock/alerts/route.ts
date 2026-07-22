@@ -3,6 +3,7 @@ import { RowDataPacket } from "mysql2";
 import db from "@/lib/db";
 import { requireRole } from "@/lib/session";
 import { getStockLocalDate } from "@/lib/stock";
+import { getStockUnit } from "@/lib/stock-units";
 
 interface SeasonRow extends RowDataPacket {
   is_high: number;
@@ -51,8 +52,11 @@ export async function GET() {
     items: rows.map((row) => {
       const currentQuantity = Number(row.current_quantity);
       const activeMinimum = Number(row.active_minimum);
+      const unit = getStockUnit(row.unit);
       return {
         ...row,
+        unit: unit.value,
+        unit_abbreviation: unit.abbreviation,
         current_quantity: currentQuantity,
         active_minimum: activeMinimum,
         shortage: Math.max(0, Number((activeMinimum - currentQuantity).toFixed(2))),

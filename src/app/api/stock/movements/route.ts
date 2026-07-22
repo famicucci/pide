@@ -3,6 +3,7 @@ import { RowDataPacket } from "mysql2";
 import db from "@/lib/db";
 import { requireRole } from "@/lib/session";
 import { stockDateBoundaryUtc } from "@/lib/stock";
+import { getStockUnit } from "@/lib/stock-units";
 
 interface MovementRow extends RowDataPacket {
   id: number;
@@ -91,11 +92,16 @@ export async function GET(request: NextRequest) {
 
   return NextResponse.json({
     total: countRows[0]?.total ?? 0,
-    movements: rows.map((row) => ({
-      ...row,
-      previous_quantity: row.previous_quantity === null ? null : Number(row.previous_quantity),
-      new_quantity: Number(row.new_quantity),
-      difference: Number(row.difference),
-    })),
+    movements: rows.map((row) => {
+      const unit = getStockUnit(row.unit);
+      return {
+        ...row,
+        unit: unit.value,
+        unit_abbreviation: unit.abbreviation,
+        previous_quantity: row.previous_quantity === null ? null : Number(row.previous_quantity),
+        new_quantity: Number(row.new_quantity),
+        difference: Number(row.difference),
+      };
+    }),
   });
 }

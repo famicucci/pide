@@ -253,7 +253,7 @@ export default function StockPage() {
                         )}
                         <h3 className="text-base font-bold leading-tight">{item.name}</h3>
                         <p className="mt-1 text-xs text-muted-foreground">
-                          Unidad: {item.unit}
+                          Unidad: {item.unit_label} ({item.unit_abbreviation})
                         </p>
                       </div>
                       {item.is_low_stock && (

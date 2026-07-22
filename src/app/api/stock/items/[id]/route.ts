@@ -3,12 +3,13 @@ import { ResultSetHeader } from "mysql2";
 import { z } from "zod";
 import db from "@/lib/db";
 import { requireRole } from "@/lib/session";
+import { STOCK_UNIT_VALUES } from "@/lib/stock-units";
 
 const updateSchema = z.object({
   category_id: z.number().int().positive().optional(),
   brand: z.string().trim().max(100).nullable().optional(),
   name: z.string().trim().min(1).max(150).optional(),
-  unit: z.string().trim().min(1).max(50).optional(),
+  unit: z.enum(STOCK_UNIT_VALUES).optional(),
   minimum_low_season: z.number().nonnegative().nullable().optional(),
   minimum_high_season: z.number().nonnegative().nullable().optional(),
   sort_order: z.number().int().optional(),

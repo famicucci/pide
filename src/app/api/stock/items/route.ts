@@ -4,6 +4,7 @@ import { z } from "zod";
 import db from "@/lib/db";
 import { requireRole } from "@/lib/session";
 import { getStockLocalDate, toNullableNumber } from "@/lib/stock";
+import { getStockUnit, STOCK_UNIT_VALUES } from "@/lib/stock-units";
 
 interface SeasonRow extends RowDataPacket {
   is_high: number;
@@ -29,7 +30,7 @@ const createSchema = z.object({
   category_id: z.number().int().positive(),
   brand: z.string().trim().max(100).optional().default(""),
   name: z.string().trim().min(1).max(150),
-  unit: z.string().trim().min(1).max(50),
+  unit: z.enum(STOCK_UNIT_VALUES),
   current_quantity: z.number().nonnegative().default(0),
   minimum_low_season: z.number().nonnegative().nullable().optional().default(null),
   minimum_high_season: z.number().nonnegative().nullable().optional().default(null),
@@ -79,9 +80,13 @@ export async function GET(request: NextRequest) {
       const minimumHigh = toNullableNumber(row.minimum_high_season);
       const activeMinimum = season === "high" ? minimumHigh : minimumLow;
       const isLowStock = activeMinimum !== null && currentQuantity <= activeMinimum;
+      const unit = getStockUnit(row.unit);
 
       return {
         ...row,
+        unit: unit.value,
+        unit_label: unit.label,
+        unit_abbreviation: unit.abbreviation,
         current_quantity: currentQuantity,
         minimum_low_season: minimumLow,
         minimum_high_season: minimumHigh,

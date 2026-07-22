@@ -25,6 +25,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
+import type { StockUnitOption } from "@/lib/stock-units";
 import type { StockCategory, StockItem } from "@/types";
 
 interface ItemResponse {
@@ -46,7 +47,7 @@ const emptyForm: ItemForm = {
   category_id: "",
   brand: "",
   name: "",
-  unit: "unidades",
+  unit: "unit",
   current_quantity: "0",
   minimum_low_season: "",
   minimum_high_season: "",
@@ -55,6 +56,7 @@ const emptyForm: ItemForm = {
 export default function AdminStockPage() {
   const [items, setItems] = useState<StockItem[]>([]);
   const [categories, setCategories] = useState<StockCategory[]>([]);
+  const [units, setUnits] = useState<StockUnitOption[]>([]);
   const [season, setSeason] = useState<"low" | "high">("low");
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -70,9 +72,10 @@ export default function AdminStockPage() {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const [itemsRes, categoriesRes] = await Promise.all([
+    const [itemsRes, categoriesRes, unitsRes] = await Promise.all([
       fetch("/api/stock/items?include_inactive=1"),
       fetch("/api/stock/categories"),
+      fetch("/api/stock/units"),
     ]);
     if (itemsRes.ok) {
       const payload = (await itemsRes.json()) as ItemResponse;
@@ -80,6 +83,7 @@ export default function AdminStockPage() {
       setSeason(payload.season);
     }
     if (categoriesRes.ok) setCategories(await categoriesRes.json());
+    if (unitsRes.ok) setUnits(await unitsRes.json());
     setLoading(false);
   }, []);
 
@@ -292,7 +296,7 @@ export default function AdminStockPage() {
                     )}
                     <h2 className="font-bold">{item.name}</h2>
                     <p className="text-xs text-muted-foreground">
-                      {item.category_name} · {item.unit}
+                      {item.category_name} · {item.unit_abbreviation}
                     </p>
                   </div>
                   {item.is_low_stock && item.active && (
@@ -376,21 +380,19 @@ export default function AdminStockPage() {
             </label>
             <label className="space-y-1">
               <Label>Unidad</Label>
-              <Input
-                list="stock-units"
+              <select
                 value={itemForm.unit}
                 onChange={(event) =>
                   setItemForm((current) => ({ ...current, unit: event.target.value }))
                 }
-              />
-              <datalist id="stock-units">
-                <option value="unidades" />
-                <option value="botellas" />
-                <option value="latas" />
-                <option value="kg" />
-                <option value="litros" />
-                <option value="paquetes" />
-              </datalist>
+                className="flex h-11 w-full rounded-md border border-input bg-background px-3 text-sm"
+              >
+                {units.map((unit) => (
+                  <option key={unit.value} value={unit.value}>
+                    {unit.label} ({unit.abbreviation})
+                  </option>
+                ))}
+              </select>
             </label>
             {!editingItem && (
               <label className="space-y-1">

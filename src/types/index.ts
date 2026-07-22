@@ -1,3 +1,5 @@
+import type { StockUnit } from "@/lib/stock-units";
+
 export type UserRole = "admin" | "waiter" | "kitchen" | "stock";
 
 export type OrderStatus = "pending" | "ready" | "delivered" | "cancelled";
@@ -81,7 +83,9 @@ export interface StockItem {
   category_name: string;
   brand: string | null;
   name: string;
-  unit: string;
+  unit: StockUnit;
+  unit_label: string;
+  unit_abbreviation: string;
   current_quantity: number;
   minimum_low_season: number | null;
   minimum_high_season: number | null;
@@ -107,6 +111,7 @@ export interface StockMovement {
   created_at: string;
   item_name: string;
   item_brand: string | null;
-  unit: string;
+  unit: StockUnit;
+  unit_abbreviation: string;
   user_name: string;
 }

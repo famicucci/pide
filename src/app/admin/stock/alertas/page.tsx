@@ -13,6 +13,7 @@ interface AlertItem {
   brand: string | null;
   name: string;
   unit: string;
+  unit_abbreviation: string;
   current_quantity: number;
   active_minimum: number;
   shortage: number;
@@ -111,7 +112,9 @@ export default function StockAlertsPage() {
                       <p className="font-bold text-amber-900">{item.shortage}</p>
                     </div>
                   </div>
-                  <p className="mt-2 text-right text-xs text-muted-foreground">{item.unit}</p>
+                  <p className="mt-2 text-right text-xs text-muted-foreground">
+                    {item.unit_abbreviation}
+                  </p>
                 </article>
               ))}
             </div>

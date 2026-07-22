@@ -41,7 +41,7 @@ Al crear un artículo se guardará su cantidad y se generará un movimiento espe
 
 Editar los mínimos, la marca u otros metadatos de un artículo no generará movimientos: el historial registra únicamente cambios de cantidad.
 
-La unidad será un texto corto por artículo (por ejemplo `botellas`, `kg`, `latas`). La interfaz de creación ofrecerá sugerencias frecuentes, pero el valor se almacenará como cadena libre para no limitar los insumos de la planilla.
+La unidad se elegirá de un catálogo cerrado definido por la API. Cada opción tendrá un código estable, un nombre y una abreviatura (por ejemplo Botella / `bot.`, Kilogramo / `kg`, Litro / `L`). La creación y edición de artículos utilizará un selector; la API rechazará valores que no pertenezcan al enum.
 
 Los artículos y categorías se desactivarán en lugar de eliminarse para preservar correctamente el historial.
 

@@ -104,6 +104,30 @@ const statements = [
     INDEX \`idx_stock_items_name_brand\` (\`name\`, \`brand\`)
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci`,
 
+  `UPDATE \`stock_items\`
+   SET \`unit\` = CASE \`unit\`
+     WHEN 'unidades' THEN 'unit'
+     WHEN 'unidad' THEN 'unit'
+     WHEN 'botellas' THEN 'bottle'
+     WHEN 'botella' THEN 'bottle'
+     WHEN 'latas' THEN 'can'
+     WHEN 'lata' THEN 'can'
+     WHEN 'kg' THEN 'kilogram'
+     WHEN 'gramos' THEN 'gram'
+     WHEN 'litros' THEN 'liter'
+     WHEN 'ml' THEN 'milliliter'
+     WHEN 'paquetes' THEN 'package'
+     WHEN 'cajas' THEN 'box'
+     WHEN 'bolsas' THEN 'bag'
+     WHEN 'rollos' THEN 'roll'
+     WHEN 'atados' THEN 'bundle'
+     ELSE \`unit\`
+   END
+   WHERE \`unit\` IN (
+     'unidades','unidad','botellas','botella','latas','lata','kg','gramos',
+     'litros','ml','paquetes','cajas','bolsas','rollos','atados'
+   )`,
+
   `CREATE TABLE IF NOT EXISTS \`stock_movements\` (
     \`id\` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     \`stock_item_id\` INT UNSIGNED NOT NULL,

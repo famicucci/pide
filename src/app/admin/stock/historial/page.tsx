@@ -199,7 +199,7 @@ export default function StockHistoryPage() {
                     <div className="min-w-0">
                       <p className="text-xs font-medium text-muted-foreground">
                         {movement.item_brand ? `${movement.item_brand} · ` : ""}
-                        {movement.unit}
+                        {movement.unit_abbreviation}
                       </p>
                       <h2 className="font-bold">{movement.item_name}</h2>
                     </div>

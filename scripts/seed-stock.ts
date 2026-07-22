@@ -118,6 +118,19 @@ interface IdRow extends RowDataPacket {
   id: number;
 }
 
+const unitCodes: Record<string, string> = {
+  unidades: "unit",
+  botellas: "bottle",
+  latas: "can",
+  kg: "kilogram",
+  atados: "bundle",
+  paquetes: "package",
+  rollos: "roll",
+  cajas: "box",
+  bolsas: "bag",
+  litros: "liter",
+};
+
 async function seedStock() {
   const db = await mysql.createConnection({
     host: process.env.DB_HOST,
@@ -153,6 +166,7 @@ async function seedStock() {
     let itemOrder = 0;
     for (const [brand, name, unit] of group.items) {
       itemOrder += 1;
+      const unitCode = unitCodes[unit] ?? "unit";
       const [existing] = await db.execute<IdRow[]>(
         "SELECT id FROM stock_items WHERE category_id = ? AND brand <=> ? AND name = ? LIMIT 1",
         [categoryId, brand, name]
@@ -163,7 +177,7 @@ async function seedStock() {
         `INSERT INTO stock_items
           (category_id, brand, name, unit, current_quantity, sort_order)
          VALUES (?, ?, ?, ?, 0, ?)`,
-        [categoryId, brand, name, unit, itemOrder]
+        [categoryId, brand, name, unitCode, itemOrder]
       );
       await db.execute(
         `INSERT INTO stock_movements
