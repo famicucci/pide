@@ -205,26 +205,28 @@ export default function StockPage() {
               />
             </div>
           </div>
-          <div className="scrollbar-hide flex gap-2 overflow-x-auto pb-1 sm:px-4">
-            <button
-              onClick={() => setCategory("all")}
-              className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium ${
-                category === "all" ? "bg-primary text-white" : "bg-muted text-foreground"
-              }`}
-            >
-              Todos
-            </button>
-            {categories.map((name) => (
+          <div className="scrollbar-hide overflow-x-auto pb-1">
+            <div className="flex w-max min-w-full gap-2 px-4">
               <button
-                key={name}
-                onClick={() => setCategory(name)}
+                onClick={() => setCategory("all")}
                 className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium ${
-                  category === name ? "bg-primary text-white" : "bg-muted text-foreground"
+                  category === "all" ? "bg-primary text-white" : "bg-muted text-foreground"
                 }`}
               >
-                {name}
+                Todos
               </button>
-            ))}
+              {categories.map((name) => (
+                <button
+                  key={name}
+                  onClick={() => setCategory(name)}
+                  className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium ${
+                    category === name ? "bg-primary text-white" : "bg-muted text-foreground"
+                  }`}
+                >
+                  {name}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </header>

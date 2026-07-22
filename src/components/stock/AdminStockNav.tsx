@@ -16,26 +16,28 @@ export function AdminStockNav() {
 
   return (
     <nav
-      className="scrollbar-hide flex items-center gap-2 overflow-x-auto"
+      className="scrollbar-hide overflow-x-auto"
       aria-label="Secciones de stock"
     >
-      {links.map((link) => {
-        const active = link.exact ? pathname === link.href : pathname.startsWith(link.href);
-        return (
-          <Link
-            key={link.href}
-            href={link.href}
-            className={cn(
-              "inline-flex h-10 shrink-0 items-center justify-center rounded-full px-4 text-sm font-medium transition-colors",
-              active
-                ? "bg-primary text-primary-foreground"
-                : "bg-white text-muted-foreground hover:text-foreground"
-            )}
-          >
-            {link.label}
-          </Link>
-        );
-      })}
+      <div className="flex w-max min-w-full items-center gap-2 px-4 sm:px-0">
+        {links.map((link) => {
+          const active = link.exact ? pathname === link.href : pathname.startsWith(link.href);
+          return (
+            <Link
+              key={link.href}
+              href={link.href}
+              className={cn(
+                "inline-flex h-10 shrink-0 items-center justify-center rounded-full px-4 text-sm font-medium transition-colors",
+                active
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-white text-muted-foreground hover:text-foreground"
+              )}
+            >
+              {link.label}
+            </Link>
+          );
+        })}
+      </div>
     </nav>
   );
 }
