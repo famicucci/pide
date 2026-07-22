@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { RowDataPacket } from "mysql2";
 import db from "@/lib/db";
 import { requireRole } from "@/lib/session";
+import { stockDateBoundaryUtc } from "@/lib/stock";
 
 interface MovementRow extends RowDataPacket {
   id: number;
@@ -23,6 +24,12 @@ interface CountRow extends RowDataPacket {
   total: number;
 }
 
+function isValidDate(value: string) {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const date = new Date(`${value}T00:00:00Z`);
+  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value;
+}
+
 export async function GET(request: NextRequest) {
   const session = await requireRole("admin");
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -32,9 +39,19 @@ export async function GET(request: NextRequest) {
   const offset = Math.max(Number(params.get("offset")) || 0, 0);
   const itemId = Number(params.get("item_id"));
   const userId = Number(params.get("user_id"));
+  const from = params.get("from");
+  const to = params.get("to");
+
+  if (
+    (from && !isValidDate(from)) ||
+    (to && !isValidDate(to)) ||
+    (from && to && from > to)
+  ) {
+    return NextResponse.json({ error: "Invalid date range" }, { status: 400 });
+  }
 
   const conditions: string[] = [];
-  const values: number[] = [];
+  const values: Array<number | string> = [];
   if (Number.isInteger(itemId) && itemId > 0) {
     conditions.push("m.stock_item_id = ?");
     values.push(itemId);
@@ -42,6 +59,14 @@ export async function GET(request: NextRequest) {
   if (Number.isInteger(userId) && userId > 0) {
     conditions.push("m.user_id = ?");
     values.push(userId);
+  }
+  if (from) {
+    conditions.push("m.created_at >= ?");
+    values.push(stockDateBoundaryUtc(from));
+  }
+  if (to) {
+    conditions.push("m.created_at < ?");
+    values.push(stockDateBoundaryUtc(to, true));
   }
   const where = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
 
