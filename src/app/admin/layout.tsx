@@ -95,7 +95,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </aside>
 
       {/* Mobile top bar */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-40 flex items-center gap-3 px-4 py-3 bg-white border-b shadow-sm">
+      <div className="md:hidden fixed top-0 left-0 right-0 z-40 flex h-14 items-center gap-3 px-4 bg-white border-b shadow-sm">
         <Sheet open={open} onOpenChange={setOpen}>
           <SheetTrigger asChild>
             <button className="p-2 -ml-2 text-muted-foreground hover:text-foreground">

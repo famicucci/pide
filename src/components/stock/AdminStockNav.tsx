@@ -16,7 +16,7 @@ export function AdminStockNav() {
 
   return (
     <nav
-      className="scrollbar-hide flex h-14 items-center gap-2 overflow-x-auto"
+      className="scrollbar-hide flex items-center gap-2 overflow-x-auto"
       aria-label="Secciones de stock"
     >
       {links.map((link) => {
@@ -26,7 +26,7 @@ export function AdminStockNav() {
             key={link.href}
             href={link.href}
             className={cn(
-              "shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors",
+              "inline-flex h-10 shrink-0 items-center justify-center rounded-full px-4 text-sm font-medium transition-colors",
               active
                 ? "bg-primary text-primary-foreground"
                 : "bg-white text-muted-foreground hover:text-foreground"
