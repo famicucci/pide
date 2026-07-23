@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { CalendarDays, Trash2 } from "lucide-react";
+import { CalendarDays, ChevronDown, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -36,6 +36,7 @@ export default function StockSeasonsPage() {
   const [end, setEnd] = useState("");
   const [currentDate, setCurrentDate] = useState("");
   const [currentSeason, setCurrentSeason] = useState<"low" | "high" | null>(null);
+  const [formOpen, setFormOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -96,6 +97,7 @@ export default function StockSeasonsPage() {
     }
     setStart("");
     setEnd("");
+    setFormOpen(false);
     const rangeYear = Number(range[0].slice(0, 4));
     setYear(rangeYear);
     if (rangeYear === year) await load();
@@ -136,34 +138,54 @@ export default function StockSeasonsPage() {
           </div>
         )}
         <div className="mb-6 rounded-2xl border bg-white p-5">
-          <div className="mb-4 flex items-start gap-3">
-            <CalendarDays className="mt-0.5 h-6 w-6 text-primary" />
-            <div>
-              <h2 className="font-bold">Marcar temporada alta</h2>
-              <p className="text-sm text-muted-foreground">
-                Elegí un día o rango. Todas las fechas no marcadas serán temporada baja.
-              </p>
+          <button
+            type="button"
+            onClick={() => setFormOpen((open) => !open)}
+            className="flex w-full items-start justify-between gap-4 text-left"
+            aria-expanded={formOpen}
+          >
+            <div className="flex items-start gap-3">
+              <CalendarDays className="mt-0.5 h-6 w-6 shrink-0 text-primary" />
+              <div>
+                <h2 className="font-bold">Marcar temporada alta</h2>
+                <p className="text-sm text-muted-foreground">
+                  Elegí un día o rango. Todas las fechas no marcadas serán temporada baja.
+                </p>
+              </div>
             </div>
-          </div>
-          <div className="grid gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
-            <label className="space-y-1">
-              <Label>Desde</Label>
-              <Input type="date" value={start} onChange={(event) => setStart(event.target.value)} />
-            </label>
-            <label className="space-y-1">
-              <Label>Hasta</Label>
-              <Input
-                type="date"
-                min={start}
-                value={end}
-                onChange={(event) => setEnd(event.target.value)}
-              />
-            </label>
-            <Button onClick={addRange} disabled={saving}>
-              {saving ? "Guardando..." : "Marcar como alta"}
-            </Button>
-          </div>
-          {error && <p className="mt-3 text-sm font-medium text-destructive">{error}</p>}
+            <ChevronDown
+              className={`mt-0.5 h-5 w-5 shrink-0 text-muted-foreground transition-transform ${
+                formOpen ? "rotate-180" : ""
+              }`}
+            />
+          </button>
+          {formOpen && (
+            <div className="mt-4 border-t pt-4">
+              <div className="grid gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
+                <label className="space-y-1">
+                  <Label>Desde</Label>
+                  <Input
+                    type="date"
+                    value={start}
+                    onChange={(event) => setStart(event.target.value)}
+                  />
+                </label>
+                <label className="space-y-1">
+                  <Label>Hasta</Label>
+                  <Input
+                    type="date"
+                    min={start}
+                    value={end}
+                    onChange={(event) => setEnd(event.target.value)}
+                  />
+                </label>
+                <Button onClick={addRange} disabled={saving}>
+                  {saving ? "Guardando..." : "Marcar como alta"}
+                </Button>
+              </div>
+              {error && <p className="mt-3 text-sm font-medium text-destructive">{error}</p>}
+            </div>
+          )}
         </div>
 
         <div className="mb-4 flex items-center justify-between">
