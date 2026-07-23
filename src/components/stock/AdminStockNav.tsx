@@ -5,8 +5,8 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 const links = [
-  { href: "/admin/stock", label: "Artículos", exact: true },
   { href: "/admin/stock/alertas", label: "Alertas" },
+  { href: "/admin/stock", label: "Artículos", exact: true },
   { href: "/admin/stock/historial", label: "Historial" },
   { href: "/admin/stock/temporadas", label: "Temporadas" },
 ];
