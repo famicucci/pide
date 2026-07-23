@@ -107,7 +107,6 @@ export default function AdminStockPage() {
   }, [items, search, statusFilter]);
 
   const activeCount = items.filter((item) => item.active).length;
-  const lowCount = items.filter((item) => item.active && item.is_low_stock).length;
 
   function openNewItem() {
     setEditingItem(null);
@@ -205,21 +204,12 @@ export default function AdminStockPage() {
           </Button>
         </div>
 
-        <div className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-3">
+        <div className="mb-5 grid grid-cols-2 gap-3">
           <div className="rounded-2xl border bg-white p-4">
             <p className="text-xs text-muted-foreground">Artículos activos</p>
             <p className="mt-1 text-2xl font-bold">{activeCount}</p>
           </div>
-          <Link
-            href="/admin/stock/alertas"
-            className={`rounded-2xl border p-4 ${
-              lowCount > 0 ? "border-amber-300 bg-amber-50" : "bg-white"
-            }`}
-          >
-            <p className="text-xs text-muted-foreground">Stock bajo</p>
-            <p className="mt-1 text-2xl font-bold">{lowCount}</p>
-          </Link>
-          <div className="col-span-2 rounded-2xl border bg-white p-4 sm:col-span-1">
+          <div className="rounded-2xl border bg-white p-4">
             <p className="text-xs text-muted-foreground">Temporada de hoy</p>
             <p className="mt-1 text-lg font-bold capitalize">{season === "high" ? "Alta" : "Baja"}</p>
           </div>
