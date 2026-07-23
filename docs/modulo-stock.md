@@ -102,14 +102,11 @@ La landing `src/app/page.tsx` se adaptará al nuevo alcance sin perder la person
 - Explicará la carga móvil, el historial de cambios, los mínimos por temporada y las alertas.
 - Reemplazará el ejemplo visual de pedidos por una representación de la pantalla de actualización de stock.
 - Eliminará los accesos visibles a cliente QR, cocina y mozo.
-- Mostrará únicamente dos accesos destacados: **Panel administrador** y **Carga de stock**.
+- Mostrará un único acceso general para ingresar a la aplicación.
 
-Cada acceso abrirá el login con el contexto elegido:
+La landing abrirá `/login` sin anticipar ni solicitar un rol. La pantalla de login mostrará únicamente el formulario de credenciales, sin subtítulos específicos para administradores o encargados de stock.
 
-- **Panel administrador** → `/login?access=admin` → después de autenticar, `/admin`.
-- **Carga de stock** → `/login?access=stock` → después de autenticar, `/stock`.
-
-No habrá ingreso automático ni credenciales expuestas en la landing. El parámetro `access` solo personaliza el mensaje del login; el destino final siempre se decidirá por el rol real del usuario autenticado. Si un usuario `stock` ingresa por el acceso de administrador, será redirigido igualmente a `/stock`, y viceversa.
+Las tarjetas informativas del final podrán explicar las funciones de **Panel administrador** y **Carga de stock**, pero ambos enlaces abrirán el mismo `/login`. No habrá ingreso automático ni credenciales expuestas en la landing. El destino final siempre se decidirá por el rol real del usuario autenticado: `admin` irá a `/admin` y `stock` a `/stock`.
 
 Para soportar este flujo se agregará el rol `stock` al esquema de usuarios, los tipos de sesión (`src/lib/session.ts`) y el mapa de redirección de `src/app/login/page.tsx`. El middleware (`middleware.ts`) protegerá `/stock` permitiendo los roles `stock` y `admin`, y su `matcher` incluirá la ruta `/stock`. El usuario inicial de carga de stock se creará mediante el script de usuarios.
 

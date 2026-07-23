@@ -1,7 +1,7 @@
 "use client";
 
-import { Suspense, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,9 +17,6 @@ const ROLE_REDIRECT: Record<string, string> = {
 
 function LoginForm() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const access = searchParams.get("access");
-  const accessLabel = access === "admin" ? "Panel administrador" : access === "stock" ? "Carga de stock" : "Acceso del personal";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -52,7 +49,7 @@ function LoginForm() {
       <Card className="w-full max-w-sm shadow-lg">
         <CardHeader className="text-center pb-2 items-center">
           <Logo className="text-4xl mb-1" />
-          <p className="text-sm text-muted-foreground">{accessLabel}</p>
+          <p className="text-sm text-muted-foreground">Ingresá con tus credenciales</p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -90,9 +87,5 @@ function LoginForm() {
 }
 
 export default function LoginPage() {
-  return (
-    <Suspense>
-      <LoginForm />
-    </Suspense>
-  );
+  return <LoginForm />;
 }

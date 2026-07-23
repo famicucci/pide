@@ -44,21 +44,12 @@ export default function LandingPage() {
               Pide · Control de stock
             </span>
           </div>
-          <div className="flex items-center gap-3 sm:gap-5">
-            <Link
-              href="/login?access=stock"
-              className="text-sm font-semibold text-muted-foreground hover:text-primary"
-            >
-              <span className="sm:hidden">Stock</span>
-              <span className="hidden sm:inline">Cargar stock</span>
-            </Link>
-            <Link
-              href="/login?access=admin"
-              className="text-sm font-semibold text-primary hover:underline"
-            >
-              Administrador
-            </Link>
-          </div>
+          <Link
+            href="/login"
+            className="text-sm font-semibold text-primary hover:underline"
+          >
+            Ingresar
+          </Link>
         </div>
       </nav>
 
@@ -78,18 +69,12 @@ export default function LandingPage() {
                 Pide convierte el control manual de inventario en una tarea rápida desde el celular.
                 Cantidades actualizadas, alertas de mínimos e historial, todo en un solo lugar.
               </p>
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+              <div className="mt-8">
                 <Link
-                  href="/login?access=stock"
+                  href="/login"
                   className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-primary px-6 font-semibold text-primary-foreground shadow-sm transition-transform hover:-translate-y-0.5"
                 >
-                  Cargar stock <ArrowRight className="h-4 w-4" />
-                </Link>
-                <Link
-                  href="/login?access=admin"
-                  className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border bg-white px-6 font-semibold hover:bg-muted"
-                >
-                  Panel administrador
+                  Ingresar a Pide <ArrowRight className="h-4 w-4" />
                 </Link>
               </div>
             </div>
@@ -194,12 +179,12 @@ export default function LandingPage() {
         <section className="bg-neutral-950 px-5 py-20 text-white sm:px-8">
           <div className="mx-auto max-w-5xl">
             <div className="mb-10 text-center">
-              <p className="text-xs font-bold uppercase tracking-widest text-red-300">Probalo en vivo</p>
-              <h2 className="mt-3 text-3xl font-extrabold">Elegí cómo querés entrar</h2>
+              <p className="text-xs font-bold uppercase tracking-widest text-red-300">Perfiles de acceso</p>
+              <h2 className="mt-3 text-3xl font-extrabold">Una experiencia para cada tarea</h2>
             </div>
             <div className="grid gap-5 sm:grid-cols-2">
               <Link
-                href="/login?access=admin"
+                href="/login"
                 className="group rounded-2xl border border-white/15 bg-white/5 p-7 transition-colors hover:bg-white/10"
               >
                 <Settings className="h-8 w-8 text-red-300" />
@@ -212,7 +197,7 @@ export default function LandingPage() {
                 </span>
               </Link>
               <Link
-                href="/login?access=stock"
+                href="/login"
                 className="group rounded-2xl border border-white/15 bg-white/5 p-7 transition-colors hover:bg-white/10"
               >
                 <ClipboardCheck className="h-8 w-8 text-red-300" />
