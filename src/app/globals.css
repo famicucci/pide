@@ -98,6 +98,17 @@ body {
   overflow-x: hidden;
 }
 
+input[type="date"] {
+  position: relative;
+  padding-right: 2.75rem;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+  position: absolute;
+  right: 0.75rem;
+  cursor: pointer;
+}
+
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
