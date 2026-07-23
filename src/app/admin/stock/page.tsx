@@ -28,7 +28,6 @@ import type { StockUnitOption } from "@/lib/stock-units";
 import type { StockCategory, StockItem } from "@/types";
 
 interface ItemResponse {
-  season: "low" | "high";
   items: StockItem[];
 }
 
@@ -56,7 +55,6 @@ export default function AdminStockPage() {
   const [items, setItems] = useState<StockItem[]>([]);
   const [categories, setCategories] = useState<StockCategory[]>([]);
   const [units, setUnits] = useState<StockUnitOption[]>([]);
-  const [season, setSeason] = useState<"low" | "high">("low");
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"all" | "low" | "inactive">("all");
@@ -79,7 +77,6 @@ export default function AdminStockPage() {
     if (itemsRes.ok) {
       const payload = (await itemsRes.json()) as ItemResponse;
       setItems(payload.items);
-      setSeason(payload.season);
     }
     if (categoriesRes.ok) setCategories(await categoriesRes.json());
     if (unitsRes.ok) setUnits(await unitsRes.json());
@@ -204,14 +201,10 @@ export default function AdminStockPage() {
           </Button>
         </div>
 
-        <div className="mb-5 grid grid-cols-2 gap-3">
+        <div className="mb-5 w-full sm:max-w-xs">
           <div className="rounded-2xl border bg-white p-4">
             <p className="text-xs text-muted-foreground">Artículos activos</p>
             <p className="mt-1 text-2xl font-bold">{activeCount}</p>
-          </div>
-          <div className="rounded-2xl border bg-white p-4">
-            <p className="text-xs text-muted-foreground">Temporada de hoy</p>
-            <p className="mt-1 text-lg font-bold capitalize">{season === "high" ? "Alta" : "Baja"}</p>
           </div>
         </div>
 
@@ -222,7 +215,7 @@ export default function AdminStockPage() {
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Buscar artículo, marca o categoría"
-              className="h-11 bg-white pl-9"
+              className="h-12 bg-white pl-9"
             />
           </div>
           <div className="flex items-center gap-2 overflow-x-auto">

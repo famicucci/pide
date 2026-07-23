@@ -9,6 +9,10 @@ interface DateRow extends RowDataPacket {
   season_date: string;
 }
 
+interface CurrentSeasonRow extends RowDataPacket {
+  is_high: number;
+}
+
 const dateString = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 const datesSchema = z.object({
   dates: z.array(dateString).min(1).max(730),
@@ -24,15 +28,29 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Invalid year" }, { status: 400 });
   }
 
-  const [rows] = await db.execute<DateRow[]>(
-    `SELECT DATE_FORMAT(season_date, '%Y-%m-%d') AS season_date
-     FROM stock_high_season_dates
-     WHERE season_date >= ? AND season_date < ?
-     ORDER BY season_date ASC`,
-    [`${year}-01-01`, `${year + 1}-01-01`]
-  );
+  const currentDate = getStockLocalDate();
+  const [[rows], [currentSeasonRows]] = await Promise.all([
+    db.execute<DateRow[]>(
+      `SELECT DATE_FORMAT(season_date, '%Y-%m-%d') AS season_date
+       FROM stock_high_season_dates
+       WHERE season_date >= ? AND season_date < ?
+       ORDER BY season_date ASC`,
+      [`${year}-01-01`, `${year + 1}-01-01`]
+    ),
+    db.execute<CurrentSeasonRow[]>(
+      `SELECT EXISTS(
+         SELECT 1 FROM stock_high_season_dates WHERE season_date = ?
+       ) AS is_high`,
+      [currentDate]
+    ),
+  ]);
 
-  return NextResponse.json({ year, dates: rows.map((row) => row.season_date) });
+  return NextResponse.json({
+    year,
+    dates: rows.map((row) => row.season_date),
+    current_date: currentDate,
+    current_season: currentSeasonRows[0]?.is_high ? "high" : "low",
+  });
 }
 
 export async function POST(request: NextRequest) {

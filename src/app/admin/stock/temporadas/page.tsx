@@ -34,6 +34,8 @@ export default function StockSeasonsPage() {
   const [dates, setDates] = useState<string[]>([]);
   const [start, setStart] = useState("");
   const [end, setEnd] = useState("");
+  const [currentDate, setCurrentDate] = useState("");
+  const [currentSeason, setCurrentSeason] = useState<"low" | "high" | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -42,8 +44,14 @@ export default function StockSeasonsPage() {
     setLoading(true);
     const response = await fetch(`/api/stock/seasons?year=${year}`);
     if (response.ok) {
-      const payload = (await response.json()) as { dates: string[] };
+      const payload = (await response.json()) as {
+        dates: string[];
+        current_date: string;
+        current_season: "low" | "high";
+      };
       setDates(payload.dates);
+      setCurrentDate(payload.current_date);
+      setCurrentSeason(payload.current_season);
     }
     setLoading(false);
   }, [year]);
@@ -88,23 +96,45 @@ export default function StockSeasonsPage() {
     }
     setStart("");
     setEnd("");
-    setYear(Number(range[0].slice(0, 4)));
-    load();
+    const rangeYear = Number(range[0].slice(0, 4));
+    setYear(rangeYear);
+    if (rangeYear === year) await load();
   }
 
   async function removeDate(date: string) {
-    await fetch("/api/stock/seasons", {
+    const response = await fetch("/api/stock/seasons", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ dates: [date] }),
     });
-    setDates((current) => current.filter((value) => value !== date));
+    if (response.ok) await load();
   }
 
   return (
     <div className="p-4 sm:p-8">
       <div className="mx-auto max-w-5xl">
         <h1 className="sr-only">Temporadas</h1>
+        {loading && currentSeason === null ? (
+          <Skeleton className="mb-4 h-24 rounded-2xl" />
+        ) : (
+          <div className="mb-4 flex items-center justify-between gap-4 rounded-2xl border bg-white p-5">
+            <div>
+              <p className="text-xs text-muted-foreground">Temporada de hoy</p>
+              <p className="mt-1 text-sm font-medium capitalize">
+                {currentDate ? formatDate(currentDate) : "Fecha no disponible"}
+              </p>
+            </div>
+            <span
+              className={`rounded-full px-4 py-2 text-sm font-bold ${
+                currentSeason === "high"
+                  ? "bg-red-50 text-primary"
+                  : "bg-green-50 text-green-800"
+              }`}
+            >
+              {currentSeason === "high" ? "Alta" : "Baja"}
+            </span>
+          </div>
+        )}
         <div className="mb-6 rounded-2xl border bg-white p-5">
           <div className="mb-4 flex items-start gap-3">
             <CalendarDays className="mt-0.5 h-6 w-6 text-primary" />
