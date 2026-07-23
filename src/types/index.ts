@@ -2,6 +2,16 @@ import type { StockUnit } from "@/lib/stock-units";
 
 export type UserRole = "admin" | "waiter" | "kitchen" | "stock";
 
+export type ManagedUserRole = Extract<UserRole, "admin" | "stock">;
+
+export interface AdminUser {
+  id: number;
+  name: string;
+  email: string;
+  role: ManagedUserRole;
+  active: boolean;
+}
+
 export type OrderStatus = "pending" | "ready" | "delivered" | "cancelled";
 
 export type ItemStatus = "pending" | "ready";

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, LogOut, Menu, PackageOpen } from "lucide-react";
+import { LayoutDashboard, LogOut, Menu, PackageOpen, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Logo } from "@/components/ui/logo";
@@ -11,6 +11,7 @@ import { Logo } from "@/components/ui/logo";
 const NAV = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { href: "/admin/stock", label: "Stock", icon: PackageOpen },
+  { href: "/admin/usuarios", label: "Usuarios", icon: Users },
   // Menú y Mesas quedan fuera de la navegación durante el MVP de stock.
 ];
 

@@ -44,12 +44,21 @@ export default function LandingPage() {
               Pide · Control de stock
             </span>
           </div>
-          <Link
-            href="/login?access=admin"
-            className="text-sm font-semibold text-primary hover:underline"
-          >
-            Ingresar
-          </Link>
+          <div className="flex items-center gap-3 sm:gap-5">
+            <Link
+              href="/login?access=stock"
+              className="text-sm font-semibold text-muted-foreground hover:text-primary"
+            >
+              <span className="sm:hidden">Stock</span>
+              <span className="hidden sm:inline">Cargar stock</span>
+            </Link>
+            <Link
+              href="/login?access=admin"
+              className="text-sm font-semibold text-primary hover:underline"
+            >
+              Administrador
+            </Link>
+          </div>
         </div>
       </nav>
 

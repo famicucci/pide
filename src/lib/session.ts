@@ -1,5 +1,7 @@
 import { getIronSession, type SessionOptions } from "iron-session";
 import { cookies } from "next/headers";
+import type { RowDataPacket } from "mysql2";
+import db from "@/lib/db";
 import type { UserRole } from "@/types";
 
 export interface SessionData {
@@ -26,8 +28,30 @@ export async function getSession() {
 
 export async function requireRole(...roles: SessionData["role"][]) {
   const session = await getSession();
-  if (!session.userId || !roles.includes(session.role)) {
+  if (!session.userId) {
     return null;
   }
-  return session;
+
+  interface CurrentUserRow extends RowDataPacket {
+    id: number;
+    name: string;
+    role: UserRole;
+    active: number;
+  }
+
+  const [rows] = await db.execute<CurrentUserRow[]>(
+    "SELECT id, name, role, active FROM users WHERE id = ? LIMIT 1",
+    [session.userId]
+  );
+  const user = rows[0];
+
+  if (!user || !user.active || !roles.includes(user.role)) {
+    return null;
+  }
+
+  return {
+    userId: user.id,
+    name: user.name,
+    role: user.role,
+  } satisfies SessionData;
 }
