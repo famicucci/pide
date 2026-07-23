@@ -135,7 +135,11 @@ export default function StockHistoryPage() {
 
           {filtersOpen && (
             <div className="mt-4 border-t pt-4">
-              <div className="mb-4 flex gap-2 overflow-x-auto pb-1">
+              <div
+                className={`flex gap-2 overflow-x-auto pb-3 ${
+                  customRangeOpen || activeFilter ? "mb-4" : ""
+                }`}
+              >
                 <button
                   onClick={applyLast24h}
                   className="shrink-0 rounded-full bg-muted px-4 py-2 text-sm font-medium"
