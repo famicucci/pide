@@ -66,6 +66,9 @@ export default function AdminStockPage() {
   const [categoryDialog, setCategoryDialog] = useState(false);
   const [categoryName, setCategoryName] = useState("");
   const [savingCategory, setSavingCategory] = useState(false);
+  const [updatingItemIds, setUpdatingItemIds] = useState<Set<number>>(new Set());
+  const [exitingItemIds, setExitingItemIds] = useState<Set<number>>(new Set());
+  const [actionError, setActionError] = useState("");
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -163,12 +166,54 @@ export default function AdminStockPage() {
   }
 
   async function toggleItem(item: StockItem) {
-    await fetch(`/api/stock/items/${item.id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ active: !item.active }),
-    });
-    load();
+    if (updatingItemIds.has(item.id)) return;
+
+    const nextActive = !item.active;
+    setActionError("");
+    setUpdatingItemIds((current) => new Set(current).add(item.id));
+
+    try {
+      const response = await fetch(`/api/stock/items/${item.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ active: nextActive }),
+      });
+
+      if (!response.ok) {
+        setActionError("No se pudo cambiar el estado del artículo.");
+        return;
+      }
+
+      const leavesCurrentFilter =
+        (statusFilter === "active" && !nextActive) ||
+        (statusFilter === "inactive" && nextActive);
+
+      if (leavesCurrentFilter) {
+        setExitingItemIds((current) => new Set(current).add(item.id));
+        await new Promise((resolve) => setTimeout(resolve, 500));
+      }
+
+      setItems((current) =>
+        current.map((currentItem) =>
+          currentItem.id === item.id
+            ? { ...currentItem, active: nextActive }
+            : currentItem
+        )
+      );
+      setExitingItemIds((current) => {
+        const next = new Set(current);
+        next.delete(item.id);
+        return next;
+      });
+    } catch {
+      setActionError("No se pudo conectar con el servidor.");
+    } finally {
+      setUpdatingItemIds((current) => {
+        const next = new Set(current);
+        next.delete(item.id);
+        return next;
+      });
+    }
   }
 
   async function saveCategory() {
@@ -233,6 +278,11 @@ export default function AdminStockPage() {
             <Plus className="mr-1 h-4 w-4" /> Categoría
           </Button>
         </div>
+        {actionError && (
+          <p className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-medium text-red-700">
+            {actionError}
+          </p>
+        )}
 
         {loading ? (
           <div className="grid gap-3 sm:grid-cols-2">
@@ -249,8 +299,14 @@ export default function AdminStockPage() {
             {filteredItems.map((item) => (
               <article
                 key={item.id}
-                className={`rounded-2xl border bg-white p-4 ${
-                  !item.active ? "opacity-55" : item.is_low_stock ? "border-amber-300" : ""
+                className={`overflow-hidden rounded-2xl border bg-white p-4 transition-all duration-500 ease-out ${
+                  exitingItemIds.has(item.id)
+                    ? "translate-y-1 scale-[0.98] opacity-0"
+                    : !item.active
+                      ? "opacity-55"
+                      : item.is_low_stock
+                        ? "border-amber-300"
+                        : ""
                 }`}
               >
                 <div className="flex items-start justify-between gap-3">
@@ -291,8 +347,15 @@ export default function AdminStockPage() {
                   <Button variant="ghost" size="sm" onClick={() => openEditItem(item)}>
                     <Pencil className="mr-1 h-4 w-4" /> Editar
                   </Button>
-                  <Button variant="ghost" size="sm" onClick={() => toggleItem(item)}>
-                    {item.active ? (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => toggleItem(item)}
+                    disabled={updatingItemIds.has(item.id)}
+                  >
+                    {updatingItemIds.has(item.id) ? (
+                      "Guardando..."
+                    ) : item.active ? (
                       <><EyeOff className="mr-1 h-4 w-4" /> Desactivar</>
                     ) : (
                       <><Eye className="mr-1 h-4 w-4" /> Activar</>
