@@ -57,7 +57,7 @@ export default function AdminStockPage() {
   const [units, setUnits] = useState<StockUnitOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<"all" | "low" | "inactive">("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">("all");
   const [itemDialog, setItemDialog] = useState(false);
   const [editingItem, setEditingItem] = useState<StockItem | null>(null);
   const [itemForm, setItemForm] = useState<ItemForm>(emptyForm);
@@ -97,13 +97,11 @@ export default function AdminStockPage() {
           .includes(term);
       const matchesStatus =
         statusFilter === "all" ||
-        (statusFilter === "low" && item.active && item.is_low_stock) ||
+        (statusFilter === "active" && item.active) ||
         (statusFilter === "inactive" && !item.active);
       return matchesSearch && matchesStatus;
     });
   }, [items, search, statusFilter]);
-
-  const activeCount = items.filter((item) => item.active).length;
 
   function openNewItem() {
     setEditingItem(null);
@@ -201,13 +199,6 @@ export default function AdminStockPage() {
           </Button>
         </div>
 
-        <div className="mb-5 w-full sm:max-w-xs">
-          <div className="rounded-2xl border bg-white p-4">
-            <p className="text-xs text-muted-foreground">Artículos activos</p>
-            <p className="mt-1 text-2xl font-bold">{activeCount}</p>
-          </div>
-        </div>
-
         <div className="mb-4 flex flex-col gap-3 sm:flex-row">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -220,7 +211,7 @@ export default function AdminStockPage() {
           </div>
           <div className="flex items-center gap-2 overflow-x-auto">
             <SlidersHorizontal className="h-4 w-4 shrink-0 text-muted-foreground" />
-            {(["all", "low", "inactive"] as const).map((filter) => (
+            {(["all", "active", "inactive"] as const).map((filter) => (
               <button
                 key={filter}
                 onClick={() => setStatusFilter(filter)}
@@ -228,7 +219,7 @@ export default function AdminStockPage() {
                   statusFilter === filter ? "bg-foreground text-background" : "bg-white"
                 }`}
               >
-                {filter === "all" ? "Todos" : filter === "low" ? "Stock bajo" : "Inactivos"}
+                {filter === "all" ? "Todos" : filter === "active" ? "Activos" : "Inactivos"}
               </button>
             ))}
           </div>
