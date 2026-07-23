@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { CheckCircle2, PackageOpen, Printer, TriangleAlert } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { CheckCircle2, PackageOpen, Printer, Search, TriangleAlert } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 
 interface AlertItem {
@@ -27,6 +28,8 @@ interface AlertsResponse {
 export default function StockAlertsPage() {
   const [data, setData] = useState<AlertsResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [category, setCategory] = useState("all");
 
   useEffect(() => {
     fetch("/api/stock/alerts")
@@ -34,6 +37,27 @@ export default function StockAlertsPage() {
       .then(setData)
       .finally(() => setLoading(false));
   }, []);
+
+  const categories = useMemo(
+    () =>
+      [...new Set(data?.items.map((item) => item.category_name) ?? [])].sort((a, b) =>
+        a.localeCompare(b, "es")
+      ),
+    [data]
+  );
+
+  const filteredItems = useMemo(() => {
+    const term = search.trim().toLocaleLowerCase("es");
+    return (data?.items ?? []).filter((item) => {
+      const matchesCategory = category === "all" || item.category_name === category;
+      const matchesSearch =
+        !term ||
+        `${item.brand ?? ""} ${item.name} ${item.category_name}`
+          .toLocaleLowerCase("es")
+          .includes(term);
+      return matchesCategory && matchesSearch;
+    });
+  }, [category, data, search]);
 
   return (
     <>
@@ -58,73 +82,111 @@ export default function StockAlertsPage() {
           </div>
         ) : (
           <>
-            <div className="mb-4 rounded-2xl border border-amber-300 bg-amber-50 p-4">
-              <div className="flex items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <TriangleAlert className="h-6 w-6 shrink-0 text-amber-800" />
-                  <div>
-                    <p className="font-bold">
-                      {data.count} {data.count === 1 ? "artículo necesita" : "artículos necesitan"} atención
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      Mínimos de temporada {data.season === "high" ? "alta" : "baja"}.
-                    </p>
-                  </div>
+            <div className="mb-5 flex items-center justify-between gap-4 px-1">
+              <div className="flex items-center gap-3">
+                <TriangleAlert className="h-6 w-6 shrink-0 text-amber-700" />
+                <div>
+                  <h2 className="text-xl font-extrabold tracking-tight">
+                    {data.count} {data.count === 1 ? "artículo" : "artículos"}
+                  </h2>
+                  <p className="text-sm text-muted-foreground">
+                    Mínimos de temporada {data.season === "high" ? "alta" : "baja"}.
+                  </p>
                 </div>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => window.print()}
-                  aria-label="Imprimir reporte"
-                  title="Imprimir reporte"
-                  className="shrink-0 rounded-2xl bg-white"
-                >
-                  <Printer className="h-4 w-4" />
-                </Button>
+              </div>
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => window.print()}
+                aria-label="Imprimir reporte"
+                title="Imprimir reporte"
+                className="shrink-0 rounded-xl bg-white"
+                disabled={filteredItems.length === 0}
+              >
+                <Printer className="h-4 w-4" />
+              </Button>
+            </div>
+
+            <div className="mb-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
+                  placeholder="Buscar artículo, marca o categoría"
+                  className="h-12 bg-white pl-9"
+                />
+              </div>
+              <div className="mt-3 flex items-start gap-3">
+                <p className="flex h-9 min-w-9 shrink-0 items-center justify-center rounded-full border bg-white px-2 text-sm font-bold text-foreground">
+                  {filteredItems.length}
+                </p>
+                <div className="flex min-w-0 flex-1 gap-2 overflow-x-auto pb-3">
+                  {["all", ...categories].map((value) => (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => setCategory(value)}
+                      className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                        category === value
+                          ? "bg-foreground text-background"
+                          : "bg-white text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      {value === "all" ? "Todas" : value}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
-            <div className="grid gap-3 sm:grid-cols-2">
-              {data.items.map((item) => (
-                <article key={item.id} className="rounded-2xl border border-amber-200 bg-white p-4">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      {item.brand && (
-                        <p className="text-xs font-semibold uppercase tracking-wide text-primary">
-                          {item.brand}
-                        </p>
-                      )}
-                      <h2 className="font-bold">{item.name}</h2>
-                      <p className="text-xs text-muted-foreground">{item.category_name}</p>
+            {filteredItems.length === 0 ? (
+              <div className="rounded-2xl border bg-white p-10 text-center text-muted-foreground">
+                No hay alertas que coincidan con la búsqueda o categoría.
+              </div>
+            ) : (
+              <div className="grid gap-3 sm:grid-cols-2">
+                {filteredItems.map((item) => (
+                  <article key={item.id} className="rounded-2xl border border-amber-200 bg-white p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        {item.brand && (
+                          <p className="text-xs font-semibold uppercase tracking-wide text-primary">
+                            {item.brand}
+                          </p>
+                        )}
+                        <h2 className="font-bold">{item.name}</h2>
+                        <p className="text-xs text-muted-foreground">{item.category_name}</p>
+                      </div>
+                      <PackageOpen className="h-5 w-5 text-amber-700" />
                     </div>
-                    <PackageOpen className="h-5 w-5 text-amber-700" />
-                  </div>
-                  <div className="mt-4 grid grid-cols-3 gap-2 text-center">
-                    <div className="rounded-xl bg-muted/60 p-2">
-                      <p className="text-[11px] text-muted-foreground">Actual</p>
-                      <p className="font-bold">{item.current_quantity}</p>
+                    <div className="mt-4 grid grid-cols-3 gap-2 text-center">
+                      <div className="rounded-xl bg-muted/60 p-2">
+                        <p className="text-[11px] text-muted-foreground">Actual</p>
+                        <p className="font-bold">{item.current_quantity}</p>
+                      </div>
+                      <div className="rounded-xl bg-muted/60 p-2">
+                        <p className="text-[11px] text-muted-foreground">Mínimo</p>
+                        <p className="font-bold">{item.active_minimum}</p>
+                      </div>
+                      <div className="rounded-xl bg-amber-100 p-2">
+                        <p className="text-[11px] text-amber-900">Faltante</p>
+                        <p className="font-bold text-amber-900">{item.shortage}</p>
+                      </div>
                     </div>
-                    <div className="rounded-xl bg-muted/60 p-2">
-                      <p className="text-[11px] text-muted-foreground">Mínimo</p>
-                      <p className="font-bold">{item.active_minimum}</p>
-                    </div>
-                    <div className="rounded-xl bg-amber-100 p-2">
-                      <p className="text-[11px] text-amber-900">Faltante</p>
-                      <p className="font-bold text-amber-900">{item.shortage}</p>
-                    </div>
-                  </div>
-                  <p className="mt-2 text-right text-xs text-muted-foreground">
-                    {item.unit_abbreviation}
-                  </p>
-                </article>
-              ))}
-            </div>
+                    <p className="mt-2 text-right text-xs text-muted-foreground">
+                      {item.unit_abbreviation}
+                    </p>
+                  </article>
+                ))}
+              </div>
+            )}
           </>
         )}
         </div>
       </div>
 
-      {data && data.items.length > 0 && (
+      {data && filteredItems.length > 0 && (
         <section className="stock-print-report hidden bg-white text-black print:block">
           <header className="mb-6 border-b-2 border-black pb-4">
             <p className="text-sm font-bold uppercase tracking-wider">La Cuadra · Pide</p>
@@ -138,8 +200,9 @@ export default function StockAlertsPage() {
           </header>
 
           <p className="mb-4 text-sm">
-            {data.count} {data.count === 1 ? "artículo alcanzó" : "artículos alcanzaron"} el
-            stock mínimo configurado.
+            {filteredItems.length}{" "}
+            {filteredItems.length === 1 ? "artículo alcanzó" : "artículos alcanzaron"} el stock
+            mínimo configurado.
           </p>
 
           <table className="w-full border-collapse text-left text-sm">
@@ -153,7 +216,7 @@ export default function StockAlertsPage() {
               </tr>
             </thead>
             <tbody>
-              {data.items.map((item) => (
+              {filteredItems.map((item) => (
                 <tr key={item.id} className="border-b border-gray-300">
                   <td className="py-2.5 pr-3">
                     <span className="font-semibold">
