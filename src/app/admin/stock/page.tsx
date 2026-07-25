@@ -8,7 +8,6 @@ import {
   PackagePlus,
   Pencil,
   Plus,
-  Search,
   SlidersHorizontal,
 } from "lucide-react";
 import { badgeVariants } from "@/components/ui/badge";
@@ -23,7 +22,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useSearchMode } from "@/components/admin/search-mode";
+import { StockSearchBar } from "@/components/stock/StockSearchBar";
 import { normalizeSearchText } from "@/lib/search";
+import { cn } from "@/lib/utils";
 import type { StockUnitOption } from "@/lib/stock-units";
 import type { StockCategory, StockItem } from "@/types";
 
@@ -60,6 +62,7 @@ const emptyForm: ItemForm = {
 };
 
 export default function AdminStockPage() {
+  const { searchMode, setSearchMode } = useSearchMode();
   const [items, setItems] = useState<StockItem[]>([]);
   const [categories, setCategories] = useState<StockCategory[]>([]);
   const [units, setUnits] = useState<StockUnitOption[]>([]);
@@ -264,7 +267,12 @@ export default function AdminStockPage() {
     <div className="p-4 sm:p-8">
       <div className="mx-auto max-w-5xl">
         <h1 className="sr-only">Artículos</h1>
-        <div className="mb-5 flex justify-end gap-2">
+        <div
+          className={cn(
+            "mb-5 justify-end gap-2",
+            searchMode ? "hidden md:flex" : "flex"
+          )}
+        >
           <Button asChild variant="outline" className="flex-1 sm:flex-none">
             <Link href="/stock">Actualizar stock</Link>
           </Button>
@@ -275,16 +283,20 @@ export default function AdminStockPage() {
         </div>
 
         <div className="mb-4 flex flex-col gap-3 sm:flex-row">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder="Buscar artículo, marca o categoría"
-              className="h-12 bg-white pl-9"
-            />
-          </div>
-          <div className="flex items-center gap-2 overflow-x-auto">
+          <StockSearchBar
+            value={search}
+            onChange={setSearch}
+            placeholder="Buscar artículo, marca o categoría"
+            searchMode={searchMode}
+            onSearchModeChange={setSearchMode}
+            className="flex-1"
+          />
+          <div
+            className={cn(
+              "items-center gap-2 overflow-x-auto",
+              searchMode ? "hidden md:flex" : "flex"
+            )}
+          >
             <SlidersHorizontal className="h-4 w-4 shrink-0 text-muted-foreground" />
             {(["all", "active", "inactive"] as const).map((filter) => (
               <button
@@ -300,7 +312,12 @@ export default function AdminStockPage() {
           </div>
         </div>
 
-        <div className="mb-4 flex items-center justify-between">
+        <div
+          className={cn(
+            "mb-4 items-center justify-between",
+            searchMode ? "hidden md:flex" : "flex"
+          )}
+        >
           <p className="text-sm font-semibold text-muted-foreground">
             {filteredItems.length} artículos
           </p>

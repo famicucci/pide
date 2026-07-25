@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { LayoutDashboard, LogOut, Menu, PackageOpen, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Logo } from "@/components/ui/logo";
+import { SearchModeProvider } from "@/components/admin/search-mode";
 
 const NAV = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
@@ -80,6 +81,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const [lowStockCount, setLowStockCount] = useState(0);
+  const [searchMode, setSearchMode] = useState(false);
+  const searchModeValue = useMemo(() => ({ searchMode, setSearchMode }), [searchMode]);
 
   useEffect(() => {
     fetch("/api/stock/alerts")
@@ -88,36 +91,52 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       .catch(() => setLowStockCount(0));
   }, [pathname]);
 
+  useEffect(() => {
+    setSearchMode(false);
+  }, [pathname]);
+
   return (
-    <div className="flex min-h-screen">
-      {/* Desktop sidebar */}
-      <aside className="hidden md:flex w-56 border-r bg-white flex-col shrink-0">
-        <NavLinks pathname={pathname} lowStockCount={lowStockCount} />
-      </aside>
+    <SearchModeProvider value={searchModeValue}>
+      <div className="flex min-h-screen">
+        {/* Desktop sidebar */}
+        <aside className="hidden md:flex w-56 border-r bg-white flex-col shrink-0">
+          <NavLinks pathname={pathname} lowStockCount={lowStockCount} />
+        </aside>
 
-      {/* Mobile top bar */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-40 flex h-14 items-center gap-3 px-4 bg-white border-b shadow-sm">
-        <Sheet open={open} onOpenChange={setOpen}>
-          <SheetTrigger asChild>
-            <button className="p-2 -ml-2 text-muted-foreground hover:text-foreground">
-              <Menu className="h-5 w-5" />
-            </button>
-          </SheetTrigger>
-          <SheetContent side="left" className="p-0 w-64">
-            <NavLinks
-              pathname={pathname}
-              lowStockCount={lowStockCount}
-              onNavigate={() => setOpen(false)}
-            />
-          </SheetContent>
-        </Sheet>
-        <Logo className="text-xl" />
+        {/* Mobile top bar */}
+        <div
+          className={cn(
+            "md:hidden fixed top-0 left-0 right-0 z-40 h-14 items-center gap-3 px-4 bg-white border-b shadow-sm",
+            searchMode ? "hidden" : "flex"
+          )}
+        >
+          <Sheet open={open} onOpenChange={setOpen}>
+            <SheetTrigger asChild>
+              <button className="p-2 -ml-2 text-muted-foreground hover:text-foreground">
+                <Menu className="h-5 w-5" />
+              </button>
+            </SheetTrigger>
+            <SheetContent side="left" className="p-0 w-64">
+              <NavLinks
+                pathname={pathname}
+                lowStockCount={lowStockCount}
+                onNavigate={() => setOpen(false)}
+              />
+            </SheetContent>
+          </Sheet>
+          <Logo className="text-xl" />
+        </div>
+
+        {/* Main */}
+        <main
+          className={cn(
+            "flex-1 min-w-0 bg-muted/30 min-h-screen md:pt-0",
+            searchMode ? "pt-0" : "pt-14"
+          )}
+        >
+          {children}
+        </main>
       </div>
-
-      {/* Main */}
-      <main className="flex-1 min-w-0 bg-muted/30 min-h-screen pt-14 md:pt-0">
-        {children}
-      </main>
-    </div>
+    </SearchModeProvider>
   );
 }

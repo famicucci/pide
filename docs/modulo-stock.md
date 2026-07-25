@@ -79,6 +79,7 @@ Crear una pantalla móvil en `src/app/stock/page.tsx`, optimizada para recorrer 
 - Acción de guardado individual por artículo.
 - Indicación clara de cambios pendientes, guardado en curso, éxito o error.
 - Búsqueda rápida por marca o producto.
+- Modo búsqueda en móviles: al enfocar el buscador se ocultan cabecera, filtros y contadores, dejando solo el campo con un botón de cruz para salir y la lista de resultados, para que el teclado no tape el contenido. El mismo comportamiento se aplica en Artículos y Alertas del panel, donde también se oculta la barra superior con el menú y el logo.
 - Sin responsable ni fecha visibles: ambos datos se obtienen de la sesión y se reservan para el historial administrativo.
 
 Cada guardado impactará inmediatamente en el stock y generará un registro histórico con la diferencia. No habrá un botón para finalizar toda la planilla.

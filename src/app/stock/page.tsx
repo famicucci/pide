@@ -13,6 +13,7 @@ import {
   Minus,
   Search,
   TriangleAlert,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -97,6 +98,8 @@ export default function StockPage() {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("all");
   const [controlFilter, setControlFilter] = useState<ControlFilter>("pending");
+  const [searchMode, setSearchMode] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const [focusedQuantityId, setFocusedQuantityId] = useState<number | null>(null);
   const [quantities, setQuantities] = useState<Record<number, string>>({});
   const [statuses, setStatuses] = useState<Record<number, SaveStatus>>({});
@@ -262,7 +265,11 @@ export default function StockPage() {
   return (
     <div className="min-h-screen bg-muted/30">
       <header className="sticky top-0 z-30 border-b bg-white/95 backdrop-blur">
-        <div className="mx-auto flex max-w-3xl items-center justify-between px-4 py-3">
+        <div
+          className={`mx-auto max-w-3xl items-center justify-between px-4 py-3 ${
+            searchMode ? "hidden" : "flex"
+          }`}
+        >
           <div className="flex items-center gap-3">
             {role === "admin" && (
               <Link
@@ -287,20 +294,37 @@ export default function StockPage() {
           </button>
         </div>
 
-        <div className="mx-auto max-w-3xl space-y-3 pb-3">
-          <div className="px-4">
-            <div className="relative">
+        <div className={`mx-auto max-w-3xl pb-3 ${searchMode ? "space-y-0 pt-3" : "space-y-3"}`}>
+          <div className="flex items-center gap-2 px-4">
+            <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
               <Input
+                ref={searchInputRef}
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
+                onFocus={() => setSearchMode(true)}
                 placeholder="Buscar marca o producto"
                 className="h-12 bg-muted/50 pl-10 text-base"
               />
             </div>
+            {searchMode && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => {
+                  setSearch("");
+                  setSearchMode(false);
+                  searchInputRef.current?.blur();
+                }}
+                aria-label="Cerrar búsqueda"
+                className="h-12 w-12 shrink-0"
+              >
+                <X className="h-5 w-5" />
+              </Button>
+            )}
           </div>
           <div
-            className="scrollbar-hide overflow-x-auto pb-1"
+            className={`scrollbar-hide overflow-x-auto pb-1 ${searchMode ? "hidden" : ""}`}
             aria-label="Filtrar por estado de control"
           >
             <div className="flex w-max min-w-full gap-2 px-4">
@@ -331,7 +355,7 @@ export default function StockPage() {
               })}
             </div>
           </div>
-          <div className="scrollbar-hide overflow-x-auto pb-1">
+          <div className={`scrollbar-hide overflow-x-auto pb-1 ${searchMode ? "hidden" : ""}`}>
             <div className="flex w-max min-w-full gap-2 px-4">
               <button
                 onClick={() => {

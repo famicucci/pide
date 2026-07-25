@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { CheckCircle2, PackageOpen, Printer, Search } from "lucide-react";
+import { CheckCircle2, PackageOpen, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useSearchMode } from "@/components/admin/search-mode";
+import { StockSearchBar } from "@/components/stock/StockSearchBar";
 import { normalizeSearchText } from "@/lib/search";
+import { cn } from "@/lib/utils";
 
 interface AlertItem {
   id: number;
@@ -29,6 +31,7 @@ interface AlertsResponse {
 }
 
 export default function StockAlertsPage() {
+  const { searchMode, setSearchMode } = useSearchMode();
   const [data, setData] = useState<AlertsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -85,7 +88,12 @@ export default function StockAlertsPage() {
           </div>
         ) : (
           <>
-            <div className="mb-5 flex items-center justify-between gap-4 px-1">
+            <div
+              className={cn(
+                "mb-5 items-center justify-between gap-4 px-1",
+                searchMode ? "hidden md:flex" : "flex"
+              )}
+            >
               <div className="flex items-center gap-2">
                 <h2 className="text-xl font-extrabold tracking-tight">Stock bajo</h2>
                 <span
@@ -111,16 +119,19 @@ export default function StockAlertsPage() {
             </div>
 
             <div className="mb-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  value={search}
-                  onChange={(event) => setSearch(event.target.value)}
-                  placeholder="Buscar artículo, marca o categoría"
-                  className="h-12 bg-white pl-9"
-                />
-              </div>
-              <div className="mt-3 flex items-start gap-3">
+              <StockSearchBar
+                value={search}
+                onChange={setSearch}
+                placeholder="Buscar artículo, marca o categoría"
+                searchMode={searchMode}
+                onSearchModeChange={setSearchMode}
+              />
+              <div
+                className={cn(
+                  "mt-3 items-start gap-3",
+                  searchMode ? "hidden md:flex" : "flex"
+                )}
+              >
                 <p className="flex h-9 min-w-9 shrink-0 items-center justify-center rounded-full border bg-white px-2 text-sm font-bold text-foreground">
                   {filteredItems.length}
                 </p>

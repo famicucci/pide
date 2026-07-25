@@ -1,13 +1,9 @@
-import { AdminStockNav } from "@/components/stock/AdminStockNav";
+import { AdminStockNavBar } from "@/components/stock/AdminStockNavBar";
 
 export default function StockLayout({ children }: { children: React.ReactNode }) {
   return (
     <div>
-      <div className="sticky top-14 z-30 border-b bg-muted/95 py-2 backdrop-blur md:top-0 sm:px-8">
-        <div className="mx-auto max-w-5xl">
-          <AdminStockNav />
-        </div>
-      </div>
+      <AdminStockNavBar />
       {children}
     </div>
   );
