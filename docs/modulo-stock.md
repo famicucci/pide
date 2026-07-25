@@ -129,7 +129,7 @@ El banner abrirá `/admin/stock/alertas`.
 - Buscador y filtros por categoría, marca y estado.
 - Navegación interna por **Artículos**, **Alertas**, **Historial** y **Temporadas**.
 
-La sección **Artículos**, seleccionada por defecto, mostrará tarjetas compactas con marca, nombre, categoría, stock actual, mínimos y estado. No permitirá editar todos los campos directamente en la lista.
+La sección **Artículos**, seleccionada por defecto, mostrará tarjetas compactas con marca, nombre, categoría, stock actual, mínimos y periodicidad de control. Las señales de stock bajo se reservan para **Alertas** y no se duplican en esta pantalla de gestión. No permitirá editar todos los campos directamente en la lista.
 
 La creación y edición completa de un artículo se realizará en un formulario enfocado: pantalla completa en móvil y diálogo o panel lateral en escritorio. Esta separación reduce errores accidentales y mantiene legible la lista administrativa. La edición de cantidades seguirá reservada a la carga rápida de `/stock`.
 

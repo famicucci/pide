@@ -10,9 +10,8 @@ import {
   Plus,
   Search,
   SlidersHorizontal,
-  TriangleAlert,
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { badgeVariants } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -323,9 +322,7 @@ export default function AdminStockPage() {
                     ? "translate-y-1 scale-[0.98] opacity-0"
                     : !item.active
                       ? "opacity-55"
-                      : item.is_low_stock
-                        ? "border-amber-300"
-                        : ""
+                      : ""
                 }`}
               >
                 <div className="flex items-start justify-between gap-3">
@@ -340,11 +337,35 @@ export default function AdminStockPage() {
                       {item.category_name} · {item.unit_abbreviation}
                     </p>
                   </div>
-                  {item.is_low_stock && item.active && (
-                    <Badge className="bg-amber-100 text-amber-900 hover:bg-amber-100">
-                      <TriangleAlert className="mr-1 h-3 w-3" /> Bajo
-                    </Badge>
-                  )}
+                  <div className="group relative shrink-0">
+                    <button
+                      type="button"
+                      aria-label="Ver significado de la periodicidad de control"
+                      aria-describedby={`control-frequency-${item.id}`}
+                      className={badgeVariants({
+                        variant: "secondary",
+                        className:
+                          "min-h-8 cursor-help focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                      })}
+                    >
+                      {item.control_interval_days === null
+                        ? "Sin control"
+                        : `${item.control_interval_days} ${
+                            item.control_interval_days === 1 ? "día" : "días"
+                          }`}
+                    </button>
+                    <span
+                      id={`control-frequency-${item.id}`}
+                      role="tooltip"
+                      className="invisible absolute right-0 top-full z-20 mt-2 w-56 max-w-[calc(100vw-3rem)] rounded-lg bg-foreground px-3 py-2 text-left text-xs font-medium leading-relaxed text-background opacity-0 shadow-lg transition-opacity group-focus-within:visible group-focus-within:opacity-100"
+                    >
+                      {item.control_interval_days === null
+                        ? "Este artículo no requiere control periódico."
+                        : item.control_interval_days === 1
+                          ? "Este artículo debe controlarse todos los días."
+                          : `Este artículo debe controlarse cada ${item.control_interval_days} días.`}
+                    </span>
+                  </div>
                 </div>
 
                 <div className="mt-4 grid grid-cols-3 gap-2 text-center">
