@@ -436,46 +436,46 @@ export default function StockPage() {
                             {item.brand}
                           </p>
                         )}
-                        <h3 className="text-base font-bold leading-tight">{item.name}</h3>
-                      </div>
-                      <div className="flex shrink-0 flex-col items-end gap-1">
-                        <div className="flex items-center gap-1.5">
+                        <h3 className="text-base font-bold leading-tight">
+                          {item.name}{" "}
                           <span
                             aria-label={`Unidad: ${item.unit_label}`}
                             title={item.unit_label}
-                            className="rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground"
+                            className="whitespace-nowrap text-sm font-medium text-muted-foreground"
                           >
-                            {item.unit_abbreviation}
+                            ({item.unit_abbreviation})
                           </span>
-                          <div className="group relative">
-                            <button
-                              type="button"
-                              aria-label={`Estado del control: ${getControlLabel(item)}`}
-                              aria-describedby={`control-status-${item.id}`}
-                              className={`flex h-7 w-7 items-center justify-center rounded-full ${
-                                item.control_status === "controlled"
-                                  ? "bg-emerald-100 text-emerald-700"
-                                  : item.control_status === "pending"
-                                    ? "bg-red-100 text-red-700"
-                                    : "bg-muted text-muted-foreground"
-                              }`}
-                            >
-                              {item.control_status === "controlled" ? (
-                                <Check className="h-4 w-4" aria-hidden="true" />
-                              ) : item.control_status === "pending" ? (
-                                <CircleX className="h-4 w-4" aria-hidden="true" />
-                              ) : (
-                                <Minus className="h-4 w-4" aria-hidden="true" />
-                              )}
-                            </button>
-                            <span
-                              id={`control-status-${item.id}`}
-                              role="tooltip"
-                              className="invisible absolute right-0 top-full z-20 mt-2 w-64 max-w-[calc(100vw-3rem)] rounded-lg bg-foreground px-3 py-2 text-left text-xs font-medium leading-relaxed text-background opacity-0 shadow-lg transition-opacity group-focus-within:visible group-focus-within:opacity-100"
-                            >
-                              {getControlLabel(item)}
-                            </span>
-                          </div>
+                        </h3>
+                      </div>
+                      <div className="flex shrink-0 flex-col items-end gap-1">
+                        <div className="group relative">
+                          <button
+                            type="button"
+                            aria-label={`Estado del control: ${getControlLabel(item)}`}
+                            aria-describedby={`control-status-${item.id}`}
+                            className={`flex h-7 w-7 items-center justify-center rounded-full ${
+                              item.control_status === "controlled"
+                                ? "bg-emerald-100 text-emerald-700"
+                                : item.control_status === "pending"
+                                  ? "bg-red-100 text-red-700"
+                                  : "bg-muted text-muted-foreground"
+                            }`}
+                          >
+                            {item.control_status === "controlled" ? (
+                              <Check className="h-4 w-4" aria-hidden="true" />
+                            ) : item.control_status === "pending" ? (
+                              <CircleX className="h-4 w-4" aria-hidden="true" />
+                            ) : (
+                              <Minus className="h-4 w-4" aria-hidden="true" />
+                            )}
+                          </button>
+                          <span
+                            id={`control-status-${item.id}`}
+                            role="tooltip"
+                            className="invisible absolute right-0 top-full z-20 mt-2 w-64 max-w-[calc(100vw-3rem)] rounded-lg bg-foreground px-3 py-2 text-left text-xs font-medium leading-relaxed text-background opacity-0 shadow-lg transition-opacity group-focus-within:visible group-focus-within:opacity-100"
+                          >
+                            {getControlLabel(item)}
+                          </span>
                         </div>
                         {item.is_low_stock && (
                           <span className="flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-900">
