@@ -17,6 +17,8 @@ interface AlertItem {
   current_quantity: number;
   active_minimum: number;
   shortage: number;
+  target_quantity: number;
+  suggested_purchase: number;
 }
 
 interface AlertsResponse {
@@ -171,8 +173,8 @@ export default function StockAlertsPage() {
                         <p className="font-bold">{item.active_minimum}</p>
                       </div>
                       <div className="rounded-xl bg-amber-100 p-2">
-                        <p className="text-[11px] text-amber-900">Faltante</p>
-                        <p className="font-bold text-amber-900">{item.shortage}</p>
+                        <p className="text-[11px] text-amber-900">Comprar</p>
+                        <p className="font-bold text-amber-900">{item.suggested_purchase}</p>
                       </div>
                     </div>
                     <p className="mt-2 text-right text-xs text-muted-foreground">
@@ -213,7 +215,7 @@ export default function StockAlertsPage() {
                 <th className="py-2 pr-3">Categoría</th>
                 <th className="py-2 pr-3 text-right">Actual</th>
                 <th className="py-2 pr-3 text-right">Mínimo</th>
-                <th className="py-2 text-right">Faltante</th>
+                <th className="py-2 text-right">Comprar</th>
               </tr>
             </thead>
             <tbody>
@@ -233,7 +235,7 @@ export default function StockAlertsPage() {
                     {item.active_minimum} {item.unit_abbreviation}
                   </td>
                   <td className="py-2.5 text-right font-semibold">
-                    {item.shortage} {item.unit_abbreviation}
+                    {item.suggested_purchase} {item.unit_abbreviation}
                   </td>
                 </tr>
               ))}

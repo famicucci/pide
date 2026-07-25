@@ -102,6 +102,7 @@ export interface StockItem {
   minimum_low_season: number | null;
   minimum_high_season: number | null;
   control_interval_days: number | null;
+  replenishment_factor: number;
   last_controlled_at: string | null;
   last_controlled_by: number | null;
   last_controlled_by_name: string | null;

@@ -13,6 +13,7 @@ const updateSchema = z.object({
   minimum_low_season: z.number().nonnegative().nullable().optional(),
   minimum_high_season: z.number().nonnegative().nullable().optional(),
   control_interval_days: z.number().int().positive().nullable().optional(),
+  replenishment_factor: z.number().min(1).max(99.99).optional(),
   sort_order: z.number().int().optional(),
   active: z.boolean().optional(),
 });

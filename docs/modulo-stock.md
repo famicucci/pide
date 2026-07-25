@@ -150,6 +150,10 @@ Cada artículo podrá tener dos mínimos configurables por el administrador:
 
 Ambos valores serán opcionales. Un artículo solo generará alertas durante una temporada si tiene configurado el mínimo correspondiente.
 
+Cada artículo tendrá además un factor de reposición, con valor por defecto `2`, que define hasta dónde conviene reponer expresado como múltiplo del mínimo vigente. Al calcularse sobre el mínimo aplicable, el objetivo acompaña automáticamente el cambio de temporada sin exigir cargar dos valores adicionales por artículo.
+
+La pantalla de alertas mostrará la compra sugerida, es decir la diferencia entre ese objetivo y la cantidad actual, en lugar del faltante hasta el mínimo. La distinción es importante: reponer solo hasta el mínimo deja el artículo en el límite y la alerta vuelve a dispararse de inmediato, porque la condición es menor o igual. Las unidades de peso, volumen y longitud conservan decimales; las que se cuentan por piezas se redondean hacia arriba, ya que no se puede comprar media botella.
+
 Cuando la cantidad actual sea menor o igual al mínimo aplicable, la aplicación deberá:
 
 - Marcar claramente el artículo como stock bajo.

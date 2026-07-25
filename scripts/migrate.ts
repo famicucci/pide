@@ -96,6 +96,7 @@ const statements = [
     \`minimum_low_season\` DECIMAL(10,2) NULL,
     \`minimum_high_season\` DECIMAL(10,2) NULL,
     \`control_interval_days\` INT UNSIGNED NULL DEFAULT 1,
+    \`replenishment_factor\` DECIMAL(4,2) NOT NULL DEFAULT 2.00,
     \`last_controlled_at\` TIMESTAMP NULL DEFAULT NULL,
     \`last_controlled_by\` INT UNSIGNED NULL,
     \`sort_order\` INT NOT NULL DEFAULT 0,
@@ -111,6 +112,8 @@ const statements = [
 
   `ALTER TABLE \`stock_items\`
     ADD COLUMN IF NOT EXISTS \`control_interval_days\` INT UNSIGNED NULL DEFAULT 1`,
+  `ALTER TABLE \`stock_items\`
+    ADD COLUMN IF NOT EXISTS \`replenishment_factor\` DECIMAL(4,2) NOT NULL DEFAULT 2.00`,
   `ALTER TABLE \`stock_items\`
     ADD COLUMN IF NOT EXISTS \`last_controlled_at\` TIMESTAMP NULL DEFAULT NULL`,
   `ALTER TABLE \`stock_items\`

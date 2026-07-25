@@ -54,6 +54,25 @@ export const STOCK_UNITS: readonly StockUnitOption[] = [
 
 const STOCK_UNIT_MAP = new Map(STOCK_UNITS.map((unit) => [unit.value, unit]));
 
+// Units measured by weight, volume or length admit fractions; the rest are
+// counted as whole pieces, so a purchase suggestion cannot ask for half of one.
+const DIVISIBLE_STOCK_UNITS = new Set<StockUnit>([
+  "kilogram",
+  "gram",
+  "liter",
+  "milliliter",
+  "meter",
+]);
+
+export function isDivisibleStockUnit(value: string): boolean {
+  return DIVISIBLE_STOCK_UNITS.has(value as StockUnit);
+}
+
+export function roundStockQuantity(quantity: number, unit: string): number {
+  if (!isDivisibleStockUnit(unit)) return Math.ceil(quantity);
+  return Number(quantity.toFixed(2));
+}
+
 export function getStockUnit(value: string): StockUnitOption {
   return STOCK_UNIT_MAP.get(value as StockUnit) ?? {
     value: "unit",

@@ -27,6 +27,7 @@ interface ItemRow extends RowDataPacket {
   minimum_low_season: string | null;
   minimum_high_season: string | null;
   control_interval_days: number | null;
+  replenishment_factor: string;
   last_controlled_at: Date | string | null;
   last_controlled_by: number | null;
   last_controlled_by_name: string | null;
@@ -45,6 +46,7 @@ const createSchema = z.object({
   minimum_low_season: z.number().nonnegative().nullable().optional().default(null),
   minimum_high_season: z.number().nonnegative().nullable().optional().default(null),
   control_interval_days: z.number().int().positive().nullable().optional().default(1),
+  replenishment_factor: z.number().min(1).max(99.99).optional().default(2),
   sort_order: z.number().int().default(0),
 });
 
@@ -74,7 +76,8 @@ export async function GET(request: NextRequest) {
   const [rows] = await db.execute<ItemRow[]>(
     `SELECT i.id, i.category_id, c.name AS category_name, i.brand, i.name, i.unit,
             i.current_quantity, i.minimum_low_season, i.minimum_high_season,
-            i.control_interval_days, i.last_controlled_at, i.last_controlled_by,
+            i.control_interval_days, i.replenishment_factor,
+            i.last_controlled_at, i.last_controlled_by,
             u.name AS last_controlled_by_name,
             i.sort_order, i.active, i.created_at, i.updated_at
      FROM stock_items i
@@ -120,6 +123,7 @@ export async function GET(request: NextRequest) {
         minimum_low_season: minimumLow,
         minimum_high_season: minimumHigh,
         control_interval_days: controlInterval,
+        replenishment_factor: Number(row.replenishment_factor),
         last_controlled_at: lastControlledAt,
         control_status: controlStatus,
         days_since_control: daysSinceControl,
@@ -150,9 +154,9 @@ export async function POST(request: NextRequest) {
     const [result] = await connection.execute<ResultSetHeader>(
       `INSERT INTO stock_items
         (category_id, brand, name, unit, current_quantity, minimum_low_season,
-         minimum_high_season, control_interval_days, last_controlled_at,
-         last_controlled_by, sort_order)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, ?, ?)`,
+         minimum_high_season, control_interval_days, replenishment_factor,
+         last_controlled_at, last_controlled_by, sort_order)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, ?, ?)`,
       [
         data.category_id,
         data.brand || null,
@@ -162,6 +166,7 @@ export async function POST(request: NextRequest) {
         data.minimum_low_season,
         data.minimum_high_season,
         data.control_interval_days,
+        data.replenishment_factor,
         session.userId,
         data.sort_order,
       ]

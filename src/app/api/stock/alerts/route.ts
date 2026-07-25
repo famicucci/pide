@@ -3,7 +3,7 @@ import { RowDataPacket } from "mysql2";
 import db from "@/lib/db";
 import { requireRole } from "@/lib/session";
 import { getStockLocalDate } from "@/lib/stock";
-import { getStockUnit } from "@/lib/stock-units";
+import { getStockUnit, roundStockQuantity } from "@/lib/stock-units";
 
 interface SeasonRow extends RowDataPacket {
   is_high: number;
@@ -17,6 +17,7 @@ interface AlertRow extends RowDataPacket {
   unit: string;
   current_quantity: string;
   active_minimum: string;
+  replenishment_factor: string;
   updated_at: string;
 }
 
@@ -35,7 +36,8 @@ export async function GET() {
 
   const [rows] = await db.execute<AlertRow[]>(`
     SELECT i.id, c.name AS category_name, i.brand, i.name, i.unit,
-           i.current_quantity, ${minimumColumn} AS active_minimum, i.updated_at
+           i.current_quantity, ${minimumColumn} AS active_minimum,
+           i.replenishment_factor, i.updated_at
     FROM stock_items i
     JOIN stock_categories c ON c.id = i.category_id
     WHERE i.active = 1
@@ -52,13 +54,21 @@ export async function GET() {
     items: rows.map((row) => {
       const currentQuantity = Number(row.current_quantity);
       const activeMinimum = Number(row.active_minimum);
+      const replenishmentFactor = Number(row.replenishment_factor);
       const unit = getStockUnit(row.unit);
+      const targetQuantity = roundStockQuantity(activeMinimum * replenishmentFactor, unit.value);
       return {
         ...row,
         unit: unit.value,
         unit_abbreviation: unit.abbreviation,
         current_quantity: currentQuantity,
         active_minimum: activeMinimum,
+        replenishment_factor: replenishmentFactor,
+        target_quantity: targetQuantity,
+        suggested_purchase: Math.max(
+          0,
+          roundStockQuantity(targetQuantity - currentQuantity, unit.value)
+        ),
         shortage: Math.max(0, Number((activeMinimum - currentQuantity).toFixed(2))),
       };
     }),

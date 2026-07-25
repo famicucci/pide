@@ -41,6 +41,8 @@ interface ItemForm {
   minimum_high_season: string;
   control_interval_option: "1" | "2" | "7" | "custom" | "none";
   control_interval_days: string;
+  replenishment_option: "2" | "1.5" | "3" | "1" | "custom";
+  replenishment_factor: string;
 }
 
 const emptyForm: ItemForm = {
@@ -53,6 +55,8 @@ const emptyForm: ItemForm = {
   minimum_high_season: "",
   control_interval_option: "1",
   control_interval_days: "1",
+  replenishment_option: "2",
+  replenishment_factor: "2",
 };
 
 export default function AdminStockPage() {
@@ -128,6 +132,11 @@ export default function AdminStockPage() {
         : interval === 1 || interval === 2 || interval === 7
           ? String(interval) as "1" | "2" | "7"
           : "custom";
+    const factor = item.replenishment_factor;
+    const replenishmentOption =
+      factor === 2 || factor === 1.5 || factor === 3 || factor === 1
+        ? (String(factor) as "2" | "1.5" | "3" | "1")
+        : "custom";
 
     setEditingItem(item);
     setItemForm({
@@ -141,6 +150,8 @@ export default function AdminStockPage() {
         item.minimum_high_season === null ? "" : String(item.minimum_high_season),
       control_interval_option: controlIntervalOption,
       control_interval_days: interval === null ? "" : String(interval),
+      replenishment_option: replenishmentOption,
+      replenishment_factor: String(factor),
     });
     setFormError("");
     setItemDialog(true);
@@ -162,6 +173,7 @@ export default function AdminStockPage() {
         itemForm.control_interval_option === "none"
           ? null
           : Number(itemForm.control_interval_days),
+      replenishment_factor: Number(itemForm.replenishment_factor),
       ...(editingItem ? {} : { current_quantity: Number(itemForm.current_quantity) }),
     };
 
@@ -337,34 +349,58 @@ export default function AdminStockPage() {
                       {item.category_name} · {item.unit_abbreviation}
                     </p>
                   </div>
-                  <div className="group relative shrink-0">
-                    <button
-                      type="button"
-                      aria-label="Ver significado de la periodicidad de control"
-                      aria-describedby={`control-frequency-${item.id}`}
-                      className={badgeVariants({
-                        variant: "secondary",
-                        className:
-                          "min-h-8 cursor-help focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-                      })}
-                    >
-                      {item.control_interval_days === null
-                        ? "Sin control"
-                        : `${item.control_interval_days} ${
-                            item.control_interval_days === 1 ? "día" : "días"
-                          }`}
-                    </button>
-                    <span
-                      id={`control-frequency-${item.id}`}
-                      role="tooltip"
-                      className="invisible absolute right-0 top-full z-20 mt-2 w-56 max-w-[calc(100vw-3rem)] rounded-lg bg-foreground px-3 py-2 text-left text-xs font-medium leading-relaxed text-background opacity-0 shadow-lg transition-opacity group-focus-within:visible group-focus-within:opacity-100"
-                    >
-                      {item.control_interval_days === null
-                        ? "Este artículo no requiere control periódico."
-                        : item.control_interval_days === 1
-                          ? "Este artículo debe controlarse todos los días."
-                          : `Este artículo debe controlarse cada ${item.control_interval_days} días.`}
-                    </span>
+                  <div className="flex shrink-0 flex-col items-end gap-1">
+                    <div className="group relative">
+                      <button
+                        type="button"
+                        aria-label="Ver significado de la periodicidad de control"
+                        aria-describedby={`control-frequency-${item.id}`}
+                        className={badgeVariants({
+                          variant: "secondary",
+                          className:
+                            "min-h-8 cursor-help focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                        })}
+                      >
+                        {item.control_interval_days === null
+                          ? "Sin control"
+                          : `${item.control_interval_days} ${
+                              item.control_interval_days === 1 ? "día" : "días"
+                            }`}
+                      </button>
+                      <span
+                        id={`control-frequency-${item.id}`}
+                        role="tooltip"
+                        className="invisible absolute right-0 top-full z-20 mt-2 w-56 max-w-[calc(100vw-3rem)] rounded-lg bg-foreground px-3 py-2 text-left text-xs font-medium leading-relaxed text-background opacity-0 shadow-lg transition-opacity group-focus-within:visible group-focus-within:opacity-100"
+                      >
+                        {item.control_interval_days === null
+                          ? "Este artículo no requiere control periódico."
+                          : item.control_interval_days === 1
+                            ? "Este artículo debe controlarse todos los días."
+                            : `Este artículo debe controlarse cada ${item.control_interval_days} días.`}
+                      </span>
+                    </div>
+                    <div className="group relative">
+                      <button
+                        type="button"
+                        aria-label="Ver significado del objetivo de reposición"
+                        aria-describedby={`replenishment-factor-${item.id}`}
+                        className={badgeVariants({
+                          variant: "outline",
+                          className:
+                            "min-h-8 cursor-help bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                        })}
+                      >
+                        x{item.replenishment_factor}
+                      </button>
+                      <span
+                        id={`replenishment-factor-${item.id}`}
+                        role="tooltip"
+                        className="invisible absolute right-0 top-full z-20 mt-2 w-64 max-w-[calc(100vw-3rem)] rounded-lg bg-foreground px-3 py-2 text-left text-xs font-medium leading-relaxed text-background opacity-0 shadow-lg transition-opacity group-focus-within:visible group-focus-within:opacity-100"
+                      >
+                        La compra sugerida repone hasta x{item.replenishment_factor} el mínimo
+                        vigente.
+                      </span>
+                    </div>
                   </div>
                 </div>
 
@@ -481,6 +517,40 @@ export default function AdminStockPage() {
                 />
               </label>
             )}
+            <label className="space-y-1">
+              <Label>Mínimo temporada baja</Label>
+              <Input
+                type="number"
+                min="0"
+                step="0.01"
+                inputMode="decimal"
+                placeholder="Sin alerta"
+                value={itemForm.minimum_low_season}
+                onChange={(event) =>
+                  setItemForm((current) => ({
+                    ...current,
+                    minimum_low_season: event.target.value,
+                  }))
+                }
+              />
+            </label>
+            <label className="space-y-1">
+              <Label>Mínimo temporada alta</Label>
+              <Input
+                type="number"
+                min="0"
+                step="0.01"
+                inputMode="decimal"
+                placeholder="Sin alerta"
+                value={itemForm.minimum_high_season}
+                onChange={(event) =>
+                  setItemForm((current) => ({
+                    ...current,
+                    minimum_high_season: event.target.value,
+                  }))
+                }
+              />
+            </label>
             <label className="space-y-1 sm:col-span-2">
               <Label>Frecuencia de control</Label>
               <select
@@ -521,40 +591,48 @@ export default function AdminStockPage() {
                 />
               </label>
             )}
-            <label className="space-y-1">
-              <Label>Mínimo temporada baja</Label>
-              <Input
-                type="number"
-                min="0"
-                step="0.01"
-                inputMode="decimal"
-                placeholder="Sin alerta"
-                value={itemForm.minimum_low_season}
-                onChange={(event) =>
+            <label className="space-y-1 sm:col-span-2">
+              <Label>Reponer hasta</Label>
+              <select
+                value={itemForm.replenishment_option}
+                onChange={(event) => {
+                  const option = event.target.value as ItemForm["replenishment_option"];
                   setItemForm((current) => ({
                     ...current,
-                    minimum_low_season: event.target.value,
-                  }))
-                }
-              />
+                    replenishment_option: option,
+                    replenishment_factor: option === "custom" ? "" : option,
+                  }));
+                }}
+                className="flex h-11 w-full rounded-md border border-input bg-background px-3 text-sm"
+              >
+                <option value="1">x1</option>
+                <option value="1.5">x1.5</option>
+                <option value="2">x2 (predeterminado)</option>
+                <option value="3">x3</option>
+                <option value="custom">Personalizado</option>
+              </select>
+              <p className="text-xs text-muted-foreground">
+                Multiplica el mínimo vigente.
+              </p>
             </label>
-            <label className="space-y-1">
-              <Label>Mínimo temporada alta</Label>
-              <Input
-                type="number"
-                min="0"
-                step="0.01"
-                inputMode="decimal"
-                placeholder="Sin alerta"
-                value={itemForm.minimum_high_season}
-                onChange={(event) =>
-                  setItemForm((current) => ({
-                    ...current,
-                    minimum_high_season: event.target.value,
-                  }))
-                }
-              />
-            </label>
+            {itemForm.replenishment_option === "custom" && (
+              <label className="space-y-1 sm:col-span-2">
+                <Label>Veces el mínimo</Label>
+                <Input
+                  type="number"
+                  min="1"
+                  step="0.5"
+                  inputMode="decimal"
+                  value={itemForm.replenishment_factor}
+                  onChange={(event) =>
+                    setItemForm((current) => ({
+                      ...current,
+                      replenishment_factor: event.target.value,
+                    }))
+                  }
+                />
+              </label>
+            )}
           </div>
           {formError && (
             <p className="px-5 pb-3 text-sm font-medium text-destructive sm:p-0">
@@ -572,7 +650,10 @@ export default function AdminStockPage() {
                 !itemForm.unit.trim() ||
                 (itemForm.control_interval_option !== "none" &&
                   (!Number.isInteger(Number(itemForm.control_interval_days)) ||
-                    Number(itemForm.control_interval_days) < 1))
+                    Number(itemForm.control_interval_days) < 1)) ||
+                !Number.isFinite(Number(itemForm.replenishment_factor)) ||
+                itemForm.replenishment_factor.trim() === "" ||
+                Number(itemForm.replenishment_factor) < 1
               }
             >
               {savingItem ? "Guardando..." : "Guardar"}
