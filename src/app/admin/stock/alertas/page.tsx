@@ -5,6 +5,7 @@ import { CheckCircle2, PackageOpen, Printer, Search, TriangleAlert } from "lucid
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { normalizeSearchText } from "@/lib/search";
 
 interface AlertItem {
   id: number;
@@ -47,14 +48,14 @@ export default function StockAlertsPage() {
   );
 
   const filteredItems = useMemo(() => {
-    const term = search.trim().toLocaleLowerCase("es");
+    const term = normalizeSearchText(search.trim());
     return (data?.items ?? []).filter((item) => {
       const matchesCategory = category === "all" || item.category_name === category;
       const matchesSearch =
         !term ||
-        `${item.brand ?? ""} ${item.name} ${item.category_name}`
-          .toLocaleLowerCase("es")
-          .includes(term);
+        normalizeSearchText(`${item.brand ?? ""} ${item.name} ${item.category_name}`).includes(
+          term
+        );
       return matchesCategory && matchesSearch;
     });
   }, [category, data, search]);

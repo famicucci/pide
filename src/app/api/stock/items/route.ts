@@ -38,7 +38,7 @@ interface ItemRow extends RowDataPacket {
 
 const createSchema = z.object({
   category_id: z.number().int().positive(),
-  brand: z.string().trim().max(100).optional().default(""),
+  brand: z.string().trim().max(100).nullable().optional().default(""),
   name: z.string().trim().min(1).max(150),
   unit: z.enum(STOCK_UNIT_VALUES),
   current_quantity: z.number().nonnegative().default(0),

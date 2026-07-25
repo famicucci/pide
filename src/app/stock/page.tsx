@@ -25,6 +25,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Logo } from "@/components/ui/logo";
+import { normalizeSearchText } from "@/lib/search";
 import type { StockControlStatus, StockItem, UserRole } from "@/types";
 
 type SaveStatus = "idle" | "saving" | "saved" | "error";
@@ -150,10 +151,10 @@ export default function StockPage() {
   );
 
   const filteredItems = useMemo(() => {
-    const term = search.trim().toLocaleLowerCase("es");
+    const term = normalizeSearchText(search.trim());
     return (data?.items ?? []).filter((item) => {
       const matchesCategory = category === "all" || item.category_name === category;
-      const haystack = `${item.brand ?? ""} ${item.name}`.toLocaleLowerCase("es");
+      const haystack = normalizeSearchText(`${item.brand ?? ""} ${item.name}`);
       const matchesSearch = !term || haystack.includes(term);
       const matchesControl =
         term ||

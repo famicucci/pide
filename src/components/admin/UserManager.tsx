@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Switch } from "@/components/ui/switch";
+import { normalizeSearchText } from "@/lib/search";
 import type { AdminUser, ManagedUserRole } from "@/types";
 
 interface UserManagerProps {
@@ -102,13 +103,11 @@ export default function UserManager({ currentUserId }: UserManagerProps) {
   }, [loadUsers]);
 
   const filteredUsers = useMemo(() => {
-    const term = query.trim().toLocaleLowerCase("es");
+    const term = normalizeSearchText(query.trim());
     if (!term) return users;
 
     return users.filter((user) =>
-      `${user.name} ${user.email} ${roleLabel[user.role]}`
-        .toLocaleLowerCase("es")
-        .includes(term)
+      normalizeSearchText(`${user.name} ${user.email} ${roleLabel[user.role]}`).includes(term)
     );
   }, [query, users]);
 

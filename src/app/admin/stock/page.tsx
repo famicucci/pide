@@ -24,6 +24,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
+import { normalizeSearchText } from "@/lib/search";
 import type { StockUnitOption } from "@/lib/stock-units";
 import type { StockCategory, StockItem } from "@/types";
 
@@ -95,13 +96,13 @@ export default function AdminStockPage() {
   }, [load]);
 
   const filteredItems = useMemo(() => {
-    const term = search.trim().toLocaleLowerCase("es");
+    const term = normalizeSearchText(search.trim());
     return items.filter((item) => {
       const matchesSearch =
         !term ||
-        `${item.brand ?? ""} ${item.name} ${item.category_name}`
-          .toLocaleLowerCase("es")
-          .includes(term);
+        normalizeSearchText(`${item.brand ?? ""} ${item.name} ${item.category_name}`).includes(
+          term
+        );
       const matchesStatus =
         statusFilter === "all" ||
         (statusFilter === "active" && item.active) ||
