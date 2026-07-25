@@ -224,7 +224,7 @@ La pantalla `/stock` sumará una fila de filtros de estado ubicada debajo del bu
 
 El botón principal pasará a llamarse **Confirmar** y estará siempre habilitado, salvo mientras haya un guardado en curso o la cantidad ingresada sea inválida. Como el campo se vacía al enfocarlo, un campo vacío se interpretará como la confirmación de la cantidad actual, que es el caso más habitual.
 
-Cada tarjeta indicará el resultado mediante un icono compacto ubicado debajo de la unidad y del aviso de stock bajo cuando corresponda: check verde para controlado, cruz roja para pendiente y guion gris para un artículo sin control periódico. Al tocar o enfocar el icono se mostrará un tooltip con la fecha, el responsable y la antigüedad del control. La cabecera usará un layout sin elementos superpuestos para conservar legibles tanto el nombre como los indicadores.
+Cada tarjeta indicará el resultado mediante un icono compacto ubicado en la misma fila que la unidad: check verde para controlado, cruz roja para pendiente y guion gris para un artículo sin control periódico. El aviso de stock bajo, cuando corresponda, se mostrará debajo de ambos. Al tocar o enfocar el icono se mostrará un tooltip con la fecha, el responsable y la antigüedad del control. La cabecera usará un layout sin elementos superpuestos para conservar legibles tanto el nombre como los indicadores y reducir la altura de las tarjetas sin marca.
 
 Al confirmar, el artículo permanecerá visible con su estado actualizado aunque el filtro activo sea **Pendientes**. La lista se depurará recién al recargar la pantalla, evitando que las tarjetas desaparezcan bajo el dedo del operario. Cuando no queden pendientes se mostrará un estado vacío que confirme que el control está al día.
 
