@@ -39,6 +39,8 @@ interface ItemForm {
   current_quantity: string;
   minimum_low_season: string;
   minimum_high_season: string;
+  control_interval_option: "1" | "2" | "7" | "custom" | "none";
+  control_interval_days: string;
 }
 
 const emptyForm: ItemForm = {
@@ -49,6 +51,8 @@ const emptyForm: ItemForm = {
   current_quantity: "0",
   minimum_low_season: "",
   minimum_high_season: "",
+  control_interval_option: "1",
+  control_interval_days: "1",
 };
 
 export default function AdminStockPage() {
@@ -117,6 +121,14 @@ export default function AdminStockPage() {
   }
 
   function openEditItem(item: StockItem) {
+    const interval = item.control_interval_days;
+    const controlIntervalOption =
+      interval === null
+        ? "none"
+        : interval === 1 || interval === 2 || interval === 7
+          ? String(interval) as "1" | "2" | "7"
+          : "custom";
+
     setEditingItem(item);
     setItemForm({
       category_id: String(item.category_id),
@@ -127,6 +139,8 @@ export default function AdminStockPage() {
       minimum_low_season: item.minimum_low_season === null ? "" : String(item.minimum_low_season),
       minimum_high_season:
         item.minimum_high_season === null ? "" : String(item.minimum_high_season),
+      control_interval_option: controlIntervalOption,
+      control_interval_days: interval === null ? "" : String(interval),
     });
     setFormError("");
     setItemDialog(true);
@@ -144,6 +158,10 @@ export default function AdminStockPage() {
         itemForm.minimum_low_season === "" ? null : Number(itemForm.minimum_low_season),
       minimum_high_season:
         itemForm.minimum_high_season === "" ? null : Number(itemForm.minimum_high_season),
+      control_interval_days:
+        itemForm.control_interval_option === "none"
+          ? null
+          : Number(itemForm.control_interval_days),
       ...(editingItem ? {} : { current_quantity: Number(itemForm.current_quantity) }),
     };
 
@@ -441,6 +459,46 @@ export default function AdminStockPage() {
                 />
               </label>
             )}
+            <label className="space-y-1 sm:col-span-2">
+              <Label>Frecuencia de control</Label>
+              <select
+                value={itemForm.control_interval_option}
+                onChange={(event) => {
+                  const option = event.target.value as ItemForm["control_interval_option"];
+                  setItemForm((current) => ({
+                    ...current,
+                    control_interval_option: option,
+                    control_interval_days:
+                      option === "none" || option === "custom" ? "" : option,
+                  }));
+                }}
+                className="flex h-11 w-full rounded-md border border-input bg-background px-3 text-sm"
+              >
+                <option value="1">Diario</option>
+                <option value="2">Cada 2 días</option>
+                <option value="7">Semanal</option>
+                <option value="custom">Personalizado</option>
+                <option value="none">Sin control periódico</option>
+              </select>
+            </label>
+            {itemForm.control_interval_option === "custom" && (
+              <label className="space-y-1 sm:col-span-2">
+                <Label>Intervalo en días</Label>
+                <Input
+                  type="number"
+                  min="1"
+                  step="1"
+                  inputMode="numeric"
+                  value={itemForm.control_interval_days}
+                  onChange={(event) =>
+                    setItemForm((current) => ({
+                      ...current,
+                      control_interval_days: event.target.value,
+                    }))
+                  }
+                />
+              </label>
+            )}
             <label className="space-y-1">
               <Label>Mínimo temporada baja</Label>
               <Input
@@ -489,7 +547,10 @@ export default function AdminStockPage() {
                 savingItem ||
                 !itemForm.category_id ||
                 !itemForm.name.trim() ||
-                !itemForm.unit.trim()
+                !itemForm.unit.trim() ||
+                (itemForm.control_interval_option !== "none" &&
+                  (!Number.isInteger(Number(itemForm.control_interval_days)) ||
+                    Number(itemForm.control_interval_days) < 1))
               }
             >
               {savingItem ? "Guardando..." : "Guardar"}

@@ -6,9 +6,11 @@ import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
   Check,
+  CircleX,
   ClipboardCheck,
   Loader2,
   LogOut,
+  Minus,
   Search,
   TriangleAlert,
 } from "lucide-react";
@@ -23,14 +25,66 @@ import {
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Logo } from "@/components/ui/logo";
-import type { StockItem, UserRole } from "@/types";
+import type { StockControlStatus, StockItem, UserRole } from "@/types";
 
 type SaveStatus = "idle" | "saving" | "saved" | "error";
+type ControlFilter = "pending" | "all" | "controlled";
+
+interface ConfirmQuantityResponse {
+  quantity: number;
+  last_controlled_at: string;
+  last_controlled_by: number;
+  last_controlled_by_name: string;
+}
 
 interface ItemsResponse {
   season: "low" | "high";
   date: string;
   items: StockItem[];
+}
+
+const controlTimeFormatter = new Intl.DateTimeFormat("es-AR", {
+  timeZone: "America/Argentina/Buenos_Aires",
+  hour: "2-digit",
+  minute: "2-digit",
+});
+
+const controlDateFormatter = new Intl.DateTimeFormat("es-AR", {
+  timeZone: "America/Argentina/Buenos_Aires",
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
+});
+
+function describeControlDate(item: StockItem): string {
+  if (!item.last_controlled_at) return "";
+  const date = new Date(item.last_controlled_at);
+  const time = controlTimeFormatter.format(date);
+  if (item.days_since_control === 0) return `hoy a las ${time}`;
+  if (item.days_since_control === 1) return `ayer a las ${time}`;
+  return `el ${controlDateFormatter.format(date)} a las ${time}`;
+}
+
+function getControlLabel(item: StockItem): string {
+  if (item.control_status === "not_required") return "Sin control periódico";
+  if (!item.last_controlled_at) return "Nunca controlado";
+
+  const controlledBy = item.last_controlled_by_name
+    ? ` · ${item.last_controlled_by_name}`
+    : "";
+  if (item.control_status === "controlled") {
+    return `Controlado ${describeControlDate(item)}${controlledBy}`;
+  }
+
+  const daysOverdue = Math.max(
+    0,
+    (item.days_since_control ?? 0) - (item.control_interval_days ?? 1)
+  );
+  const pendingSince =
+    daysOverdue === 0
+      ? "Pendiente desde hoy"
+      : `Pendiente desde hace ${daysOverdue} ${daysOverdue === 1 ? "día" : "días"}`;
+  return `${pendingSince} · último control ${describeControlDate(item)}${controlledBy}`;
 }
 
 export default function StockPage() {
@@ -41,9 +95,11 @@ export default function StockPage() {
   const [loadError, setLoadError] = useState("");
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("all");
+  const [controlFilter, setControlFilter] = useState<ControlFilter>("pending");
   const [focusedQuantityId, setFocusedQuantityId] = useState<number | null>(null);
   const [quantities, setQuantities] = useState<Record<number, string>>({});
   const [statuses, setStatuses] = useState<Record<number, SaveStatus>>({});
+  const [confirmedThisSession, setConfirmedThisSession] = useState<Set<number>>(new Set());
   const savePointerItemId = useRef<number | null>(null);
   const [pendingConfirmation, setPendingConfirmation] = useState<{
     item: StockItem;
@@ -64,6 +120,7 @@ export default function StockPage() {
       setQuantities(
         Object.fromEntries(payload.items.map((item) => [item.id, String(item.current_quantity)]))
       );
+      setConfirmedThisSession(new Set());
       if (sessionRes.ok) {
         const session = (await sessionRes.json()) as { role: UserRole };
         setRole(session.role);
@@ -84,14 +141,29 @@ export default function StockPage() {
     [data]
   );
 
+  const controlCounts = useMemo(
+    () => ({
+      pending: data?.items.filter((item) => item.control_status === "pending").length ?? 0,
+      controlled: data?.items.filter((item) => item.control_status === "controlled").length ?? 0,
+    }),
+    [data]
+  );
+
   const filteredItems = useMemo(() => {
     const term = search.trim().toLocaleLowerCase("es");
     return (data?.items ?? []).filter((item) => {
       const matchesCategory = category === "all" || item.category_name === category;
       const haystack = `${item.brand ?? ""} ${item.name}`.toLocaleLowerCase("es");
-      return matchesCategory && (!term || haystack.includes(term));
+      const matchesSearch = !term || haystack.includes(term);
+      const matchesControl =
+        term ||
+        controlFilter === "all" ||
+        (controlFilter === "pending" &&
+          (item.control_status === "pending" || confirmedThisSession.has(item.id))) ||
+        (controlFilter === "controlled" && item.control_status === "controlled");
+      return matchesCategory && matchesSearch && matchesControl;
     });
-  }, [category, data, search]);
+  }, [category, confirmedThisSession, controlFilter, data, search]);
 
   const groupedItems = useMemo(() => {
     const groups = new Map<string, StockItem[]>();
@@ -104,8 +176,8 @@ export default function StockPage() {
   }, [filteredItems]);
 
   async function saveItem(item: StockItem) {
-    const rawQuantity = quantities[item.id]?.replace(",", ".");
-    const quantity = Number(rawQuantity);
+    const rawQuantity = quantities[item.id]?.trim().replace(",", ".");
+    const quantity = rawQuantity ? Number(rawQuantity) : item.current_quantity;
     if (!Number.isFinite(quantity) || quantity < 0) {
       setStatuses((current) => ({ ...current, [item.id]: "error" }));
       return;
@@ -124,17 +196,24 @@ export default function StockPage() {
 
   async function persistItem(item: StockItem, quantity: number) {
     setStatuses((current) => ({ ...current, [item.id]: "saving" }));
-    const response = await fetch(`/api/stock/items/${item.id}/quantity`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ quantity }),
-    });
+    let response: Response;
+    try {
+      response = await fetch(`/api/stock/items/${item.id}/quantity`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ quantity }),
+      });
+    } catch {
+      setStatuses((current) => ({ ...current, [item.id]: "error" }));
+      return;
+    }
 
     if (!response.ok) {
       setStatuses((current) => ({ ...current, [item.id]: "error" }));
       return;
     }
 
+    const result = (await response.json()) as ConfirmQuantityResponse;
     setData((current) =>
       current
         ? {
@@ -144,6 +223,15 @@ export default function StockPage() {
                 ? {
                     ...currentItem,
                     current_quantity: quantity,
+                    last_controlled_at: result.last_controlled_at,
+                    last_controlled_by: result.last_controlled_by,
+                    last_controlled_by_name: result.last_controlled_by_name,
+                    control_status: (
+                      currentItem.control_interval_days === null
+                        ? "not_required"
+                        : "controlled"
+                    ) satisfies StockControlStatus,
+                    days_since_control: 0,
                     is_low_stock:
                       currentItem.active_minimum !== null &&
                       currentItem.active_minimum !== undefined &&
@@ -154,6 +242,10 @@ export default function StockPage() {
           }
         : current
     );
+    setQuantities((current) => ({ ...current, [item.id]: String(quantity) }));
+    if (item.control_interval_days !== null) {
+      setConfirmedThisSession((current) => new Set(current).add(item.id));
+    }
     setStatuses((current) => ({ ...current, [item.id]: "saved" }));
     window.setTimeout(
       () => setStatuses((current) => ({ ...current, [item.id]: "idle" })),
@@ -206,10 +298,45 @@ export default function StockPage() {
               />
             </div>
           </div>
+          <div
+            className="scrollbar-hide overflow-x-auto pb-1"
+            aria-label="Filtrar por estado de control"
+          >
+            <div className="flex w-max min-w-full gap-2 px-4">
+              {(["pending", "all", "controlled"] as const).map((filter) => {
+                const label =
+                  filter === "pending"
+                    ? `Pendientes (${controlCounts.pending})`
+                    : filter === "controlled"
+                      ? `Controlados (${controlCounts.controlled})`
+                      : "Todos";
+                return (
+                  <button
+                    key={filter}
+                    onClick={() => {
+                      setControlFilter(filter);
+                      setConfirmedThisSession(new Set());
+                    }}
+                    aria-pressed={controlFilter === filter}
+                    className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium ${
+                      controlFilter === filter
+                        ? "bg-foreground text-background"
+                        : "bg-muted text-foreground"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
           <div className="scrollbar-hide overflow-x-auto pb-1">
             <div className="flex w-max min-w-full gap-2 px-4">
               <button
-                onClick={() => setCategory("all")}
+                onClick={() => {
+                  setCategory("all");
+                  setConfirmedThisSession(new Set());
+                }}
                 className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium ${
                   category === "all" ? "bg-primary text-white" : "bg-muted text-foreground"
                 }`}
@@ -219,7 +346,10 @@ export default function StockPage() {
               {categories.map((name) => (
                 <button
                   key={name}
-                  onClick={() => setCategory(name)}
+                  onClick={() => {
+                    setCategory(name);
+                    setConfirmedThisSession(new Set());
+                  }}
                   className={`shrink-0 rounded-full px-4 py-2 text-sm font-medium ${
                     category === name ? "bg-primary text-white" : "bg-muted text-foreground"
                   }`}
@@ -248,7 +378,11 @@ export default function StockPage() {
         ) : groupedItems.length === 0 ? (
           <div className="rounded-2xl border bg-white p-8 text-center text-muted-foreground">
             <ClipboardCheck className="mx-auto mb-3 h-9 w-9" />
-            <p>No encontramos artículos.</p>
+            <p>
+              {controlFilter === "pending" && !search.trim()
+                ? "No hay controles pendientes."
+                : "No encontramos artículos."}
+            </p>
           </div>
         ) : (
           groupedItems.map(([categoryName, items]) => (
@@ -258,9 +392,9 @@ export default function StockPage() {
               </h2>
               {items.map((item) => {
                 const value = quantities[item.id] ?? "";
-                const parsedValue = Number(value.replace(",", "."));
-                const changed =
-                  Number.isFinite(parsedValue) && parsedValue !== item.current_quantity;
+                const rawValue = value.trim().replace(",", ".");
+                const parsedValue = rawValue ? Number(rawValue) : item.current_quantity;
+                const validQuantity = Number.isFinite(parsedValue) && parsedValue >= 0;
                 const status = statuses[item.id] ?? "idle";
 
                 return (
@@ -270,28 +404,59 @@ export default function StockPage() {
                       item.is_low_stock ? "border-amber-300" : ""
                     }`}
                   >
-                    <div className="mb-3 min-w-0 pr-28">
-                      {item.brand && (
-                        <p className="truncate text-xs font-semibold uppercase tracking-wide text-primary">
-                          {item.brand}
-                        </p>
-                      )}
-                      <h3 className="text-base font-bold leading-tight">{item.name}</h3>
-                    </div>
-                    <div className="absolute right-4 top-4 flex flex-col items-end gap-1">
-                      <span
-                        aria-label={`Unidad: ${item.unit_label}`}
-                        title={item.unit_label}
-                        className="rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground"
-                      >
-                        {item.unit_abbreviation}
-                      </span>
-                      {item.is_low_stock && (
-                        <span className="flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-900">
-                          <TriangleAlert className="h-3.5 w-3.5" />
-                          Stock bajo
+                    <div className="mb-3 flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        {item.brand && (
+                          <p className="truncate text-xs font-semibold uppercase tracking-wide text-primary">
+                            {item.brand}
+                          </p>
+                        )}
+                        <h3 className="text-base font-bold leading-tight">{item.name}</h3>
+                      </div>
+                      <div className="flex shrink-0 flex-col items-end gap-1">
+                        <span
+                          aria-label={`Unidad: ${item.unit_label}`}
+                          title={item.unit_label}
+                          className="rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground"
+                        >
+                          {item.unit_abbreviation}
                         </span>
-                      )}
+                        <div className="group relative">
+                          <button
+                            type="button"
+                            aria-label={`Estado del control: ${getControlLabel(item)}`}
+                            aria-describedby={`control-status-${item.id}`}
+                            className={`flex h-7 w-7 items-center justify-center rounded-full ${
+                              item.control_status === "controlled"
+                                ? "bg-emerald-100 text-emerald-700"
+                                : item.control_status === "pending"
+                                  ? "bg-red-100 text-red-700"
+                                  : "bg-muted text-muted-foreground"
+                            }`}
+                          >
+                            {item.control_status === "controlled" ? (
+                              <Check className="h-4 w-4" aria-hidden="true" />
+                            ) : item.control_status === "pending" ? (
+                              <CircleX className="h-4 w-4" aria-hidden="true" />
+                            ) : (
+                              <Minus className="h-4 w-4" aria-hidden="true" />
+                            )}
+                          </button>
+                          <span
+                            id={`control-status-${item.id}`}
+                            role="tooltip"
+                            className="invisible absolute right-0 top-full z-20 mt-2 w-64 max-w-[calc(100vw-3rem)] rounded-lg bg-foreground px-3 py-2 text-left text-xs font-medium leading-relaxed text-background opacity-0 shadow-lg transition-opacity group-focus-within:visible group-focus-within:opacity-100"
+                          >
+                            {getControlLabel(item)}
+                          </span>
+                        </div>
+                        {item.is_low_stock && (
+                          <span className="flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-1 text-xs font-semibold text-amber-900">
+                            <TriangleAlert className="h-3.5 w-3.5" />
+                            Stock bajo
+                          </span>
+                        )}
+                      </div>
                     </div>
 
                     <div className="flex items-end gap-2">
@@ -340,7 +505,7 @@ export default function StockPage() {
                           savePointerItemId.current = item.id;
                         }}
                         onClick={() => saveItem(item)}
-                        disabled={!changed || status === "saving" || parsedValue < 0}
+                        disabled={!validQuantity || status === "saving"}
                         className="h-12 w-28 shrink-0"
                       >
                         {status === "saving"
@@ -354,16 +519,16 @@ export default function StockPage() {
                             ? (
                                 <>
                                   <Check className="h-5 w-5" aria-hidden="true" />
-                                  <span className="sr-only">Guardado</span>
+                                <span className="sr-only">Confirmado</span>
                                 </>
                               )
-                            : "Guardar"}
+                            : "Confirmar"}
                       </Button>
                     </div>
 
                     {status === "error" && (
                       <p className="mt-2 text-sm font-medium text-destructive">
-                        Revisá la cantidad e intentá nuevamente.
+                        Revisá la cantidad e intentá confirmar nuevamente.
                       </p>
                     )}
 
@@ -440,7 +605,7 @@ export default function StockPage() {
                 void persistItem(item, quantity);
               }}
             >
-              Sí, guardar
+              Sí, confirmar
             </Button>
           </DialogFooter>
         </DialogContent>

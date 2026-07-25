@@ -87,6 +87,8 @@ export interface StockCategory {
   active: boolean;
 }
 
+export type StockControlStatus = "pending" | "controlled" | "not_required";
+
 export interface StockItem {
   id: number;
   category_id: number;
@@ -99,6 +101,12 @@ export interface StockItem {
   current_quantity: number;
   minimum_low_season: number | null;
   minimum_high_season: number | null;
+  control_interval_days: number | null;
+  last_controlled_at: string | null;
+  last_controlled_by: number | null;
+  last_controlled_by_name: string | null;
+  control_status: StockControlStatus;
+  days_since_control: number | null;
   sort_order: number;
   active: boolean;
   created_at: string;

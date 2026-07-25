@@ -3,8 +3,14 @@ import { ResultSetHeader, RowDataPacket } from "mysql2";
 import { z } from "zod";
 import db from "@/lib/db";
 import { requireRole } from "@/lib/session";
-import { getStockLocalDate, toNullableNumber } from "@/lib/stock";
+import {
+  getStockLocalDate,
+  parseStockUtcTimestamp,
+  stockCalendarDaysBetween,
+  toNullableNumber,
+} from "@/lib/stock";
 import { getStockUnit, STOCK_UNIT_VALUES } from "@/lib/stock-units";
+import type { StockControlStatus } from "@/types";
 
 interface SeasonRow extends RowDataPacket {
   is_high: number;
@@ -20,6 +26,10 @@ interface ItemRow extends RowDataPacket {
   current_quantity: string;
   minimum_low_season: string | null;
   minimum_high_season: string | null;
+  control_interval_days: number | null;
+  last_controlled_at: Date | string | null;
+  last_controlled_by: number | null;
+  last_controlled_by_name: string | null;
   sort_order: number;
   active: number;
   created_at: string;
@@ -34,6 +44,7 @@ const createSchema = z.object({
   current_quantity: z.number().nonnegative().default(0),
   minimum_low_season: z.number().nonnegative().nullable().optional().default(null),
   minimum_high_season: z.number().nonnegative().nullable().optional().default(null),
+  control_interval_days: z.number().int().positive().nullable().optional().default(1),
   sort_order: z.number().int().default(0),
 });
 
@@ -63,9 +74,12 @@ export async function GET(request: NextRequest) {
   const [rows] = await db.execute<ItemRow[]>(
     `SELECT i.id, i.category_id, c.name AS category_name, i.brand, i.name, i.unit,
             i.current_quantity, i.minimum_low_season, i.minimum_high_season,
+            i.control_interval_days, i.last_controlled_at, i.last_controlled_by,
+            u.name AS last_controlled_by_name,
             i.sort_order, i.active, i.created_at, i.updated_at
      FROM stock_items i
      JOIN stock_categories c ON c.id = i.category_id
+     LEFT JOIN users u ON u.id = i.last_controlled_by
      ${conditions.length ? `WHERE ${conditions.join(" AND ")}` : ""}
      ORDER BY c.sort_order ASC, c.name ASC, i.sort_order ASC, i.name ASC`,
     values
@@ -81,6 +95,21 @@ export async function GET(request: NextRequest) {
       const activeMinimum = season === "high" ? minimumHigh : minimumLow;
       const isLowStock = activeMinimum !== null && currentQuantity <= activeMinimum;
       const unit = getStockUnit(row.unit);
+      const controlInterval =
+        row.control_interval_days === null ? null : Number(row.control_interval_days);
+      const lastControlledDate = row.last_controlled_at
+        ? parseStockUtcTimestamp(row.last_controlled_at)
+        : null;
+      const lastControlledAt = lastControlledDate?.toISOString() ?? null;
+      const daysSinceControl = lastControlledDate
+        ? stockCalendarDaysBetween(getStockLocalDate(lastControlledDate), localDate)
+        : null;
+      const controlStatus: StockControlStatus =
+        controlInterval === null
+          ? "not_required"
+          : daysSinceControl === null || daysSinceControl >= controlInterval
+            ? "pending"
+            : "controlled";
 
       return {
         ...row,
@@ -90,6 +119,10 @@ export async function GET(request: NextRequest) {
         current_quantity: currentQuantity,
         minimum_low_season: minimumLow,
         minimum_high_season: minimumHigh,
+        control_interval_days: controlInterval,
+        last_controlled_at: lastControlledAt,
+        control_status: controlStatus,
+        days_since_control: daysSinceControl,
         active: Boolean(row.active),
         season,
         active_minimum: activeMinimum,
@@ -117,8 +150,9 @@ export async function POST(request: NextRequest) {
     const [result] = await connection.execute<ResultSetHeader>(
       `INSERT INTO stock_items
         (category_id, brand, name, unit, current_quantity, minimum_low_season,
-         minimum_high_season, sort_order)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+         minimum_high_season, control_interval_days, last_controlled_at,
+         last_controlled_by, sort_order)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP, ?, ?)`,
       [
         data.category_id,
         data.brand || null,
@@ -127,6 +161,8 @@ export async function POST(request: NextRequest) {
         data.current_quantity,
         data.minimum_low_season,
         data.minimum_high_season,
+        data.control_interval_days,
+        session.userId,
         data.sort_order,
       ]
     );

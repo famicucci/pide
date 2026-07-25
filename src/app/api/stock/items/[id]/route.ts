@@ -12,6 +12,7 @@ const updateSchema = z.object({
   unit: z.enum(STOCK_UNIT_VALUES).optional(),
   minimum_low_season: z.number().nonnegative().nullable().optional(),
   minimum_high_season: z.number().nonnegative().nullable().optional(),
+  control_interval_days: z.number().int().positive().nullable().optional(),
   sort_order: z.number().int().optional(),
   active: z.boolean().optional(),
 });

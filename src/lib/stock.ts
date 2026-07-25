@@ -20,6 +20,18 @@ export function stockDateBoundaryUtc(date: string, endExclusive = false): string
   return boundary.toISOString().slice(0, 19).replace("T", " ");
 }
 
+export function stockCalendarDaysBetween(startDate: string, endDate: string): number {
+  const start = Date.parse(`${startDate}T00:00:00Z`);
+  const end = Date.parse(`${endDate}T00:00:00Z`);
+  return Math.max(0, Math.round((end - start) / 86_400_000));
+}
+
+export function parseStockUtcTimestamp(value: string | Date): Date {
+  if (value instanceof Date) return value;
+  const hasTimezone = /(?:Z|[+-]\d{2}:\d{2})$/.test(value);
+  return new Date(hasTimezone ? value : `${value.replace(" ", "T")}Z`);
+}
+
 export function toNullableNumber(value: string | number | null): number | null {
   return value === null ? null : Number(value);
 }

@@ -171,6 +171,79 @@ Las alertas serán internas a la aplicación durante el MVP; no se implementará
 - El estado se calculará a partir del stock actual, los mínimos y el calendario, sin una tabla adicional de notificaciones.
 - Si el cambio de fecha activa un mínimo más alto, el artículo aparecerá como stock bajo aunque nadie haya modificado su cantidad ese día.
 
+## Control periódico
+
+El stock se controla de forma periódica, artículo por artículo. La primera versión del módulo no permite saber cuándo se controló cada artículo por última vez y, en consecuencia, cuáles quedan pendientes de recorrer.
+
+El problema central es que guardar una cantidad y controlar un artículo no son la misma acción. Cuando el conteo físico coincide con la cantidad registrada, hoy no se guarda nada: la API responde sin cambios y la pantalla mantiene el botón deshabilitado. Ese caso, que es frecuente, deja al artículo indistinguible de uno que nadie miró.
+
+La solución consiste en registrar el control como un hecho propio y en definir cada cuánto debe repetirse.
+
+### Modelo de datos
+
+Se agregarán tres columnas a `stock_items` mediante migraciones idempotentes en `scripts/migrate.ts`, manteniendo alineado `scripts/migrate.sql`:
+
+- `control_interval_days`: entero positivo con valor por defecto `1`. El valor nulo significa que el artículo no requiere control periódico.
+- `last_controlled_at`: fecha y hora del último control, nula mientras el artículo nunca haya sido controlado.
+- `last_controlled_by`: responsable del último control, con clave foránea nullable hacia `users`.
+
+No se creará una tabla nueva. `stock_movements` seguirá registrando exclusivamente los cambios de cantidad, por lo que las confirmaciones que no modifican el stock no dejarán historial: de ellas solo se conservará la última. Se acepta esa limitación a cambio de mantener el modelo simple.
+
+Durante la migración se completarán `last_controlled_at` y `last_controlled_by` con el movimiento más reciente de cada artículo, para que el estado inicial refleje el trabajo ya realizado en lugar de marcar todo el catálogo como pendiente.
+
+### Cálculo del estado
+
+El vencimiento se calculará por día calendario y no por horas transcurridas, usando la zona horaria `America/Argentina/Buenos_Aires` y el helper `getStockLocalDate` ya existente. Un intervalo diario significa entonces que cada jornada comienza con todo el catálogo pendiente, sin depender del horario exacto del control anterior.
+
+- Un artículo sin intervalo configurado nunca estará pendiente.
+- Un artículo sin fecha de control estará pendiente.
+- En los demás casos estará pendiente cuando los días transcurridos desde el último control alcancen o superen su intervalo.
+
+La antigüedad se expondrá junto al estado para poder distinguir un artículo recién vencido de uno olvidado hace una semana. No se definirá un tercer estado: un control muy atrasado seguirá siendo un pendiente, mostrado con sus días de demora.
+
+### API y permisos
+
+`PATCH /api/stock/items/:id/quantity` pasará a representar la confirmación de un control. Dentro de la misma transacción actualizará siempre `last_controlled_at` y `last_controlled_by` con la sesión activa, y actualizará la cantidad e insertará el movimiento únicamente cuando el valor haya cambiado. Se eliminará la salida anticipada que hoy revierte la transacción ante una cantidad igual, aunque la respuesta seguirá indicando que la cantidad no cambió.
+
+`GET /api/stock/items` devolverá por artículo el intervalo, la fecha del último control, el nombre del responsable, el estado calculado y los días transcurridos.
+
+`PUT /api/stock/items/:id` aceptará `control_interval_days`, admitiendo un entero mayor o igual a uno o el valor nulo. Cambiar el intervalo no modificará la fecha del último control: el próximo vencimiento se recalculará a partir del control ya registrado.
+
+La creación de un artículo registrará su carga inicial como primer control, en coherencia con el movimiento `initial` que ya genera.
+
+Los permisos no cambian. Los roles `stock` y `admin` confirman controles; solo `admin` configura el intervalo.
+
+### Experiencia de carga
+
+La pantalla `/stock` sumará una fila de filtros de estado ubicada debajo del buscador y encima de las categorías, con **Pendientes**, **Todos** y **Controlados**, cada uno con su contador. La pantalla abrirá en **Pendientes**, de modo que lo primero que vea el operario sea lo que falta recorrer. El filtro de estado se combinará con el de categoría, pero una búsqueda por texto ignorará el estado para que un artículo ya controlado siga siendo localizable.
+
+El botón principal pasará a llamarse **Confirmar** y estará siempre habilitado, salvo mientras haya un guardado en curso o la cantidad ingresada sea inválida. Como el campo se vacía al enfocarlo, un campo vacío se interpretará como la confirmación de la cantidad actual, que es el caso más habitual.
+
+Cada tarjeta indicará el resultado mediante un icono compacto ubicado debajo de la unidad y del aviso de stock bajo cuando corresponda: check verde para controlado, cruz roja para pendiente y guion gris para un artículo sin control periódico. Al tocar o enfocar el icono se mostrará un tooltip con la fecha, el responsable y la antigüedad del control. La cabecera usará un layout sin elementos superpuestos para conservar legibles tanto el nombre como los indicadores.
+
+Al confirmar, el artículo permanecerá visible con su estado actualizado aunque el filtro activo sea **Pendientes**. La lista se depurará recién al recargar la pantalla, evitando que las tarjetas desaparezcan bajo el dedo del operario. Cuando no queden pendientes se mostrará un estado vacío que confirme que el control está al día.
+
+El diálogo de confirmación por cambios inusuales se mantiene sin modificaciones.
+
+### Panel administrativo
+
+El panel conserva su rol de gestión del catálogo, por lo que la única incorporación será el campo **Frecuencia de control** en el formulario de alta y edición, con opciones directas para control diario, cada dos días, semanal, un valor personalizado en días y la alternativa sin control periódico. El valor por defecto será diario.
+
+Las tarjetas de `/admin/stock` no mostrarán información de control. Un administrador que quiera supervisar el trabajo ingresará a `/stock` y filtrará por **Controlados**, donde ya verá la fecha y el responsable de cada artículo.
+
+### Fuera de alcance
+
+- Rondas o sesiones de control con apertura, progreso y cierre formal.
+- Historial completo de confirmaciones que no modifican la cantidad.
+- Asignación de artículos por responsable y notificaciones de control vencido.
+
+### Etapas
+
+1. Agregar las columnas, el relleno inicial y los tipos.
+2. Adaptar la actualización de cantidad para registrar el control y exponer el estado en el listado.
+3. Sumar la frecuencia de control al formulario administrativo.
+4. Incorporar el filtro de estado, el indicador con detalle de último control y el botón de confirmación en `/stock`.
+
 ## Etapas de implementación
 
 1. Consultar la documentación local de Next.js 16 aplicable a Route Handlers, sesiones y navegación.
@@ -194,5 +267,9 @@ Las alertas serán internas a la aplicación durante el MVP; no se implementará
 - Verificar el cálculo de diferencias y el rechazo de cantidades negativas.
 - Verificar ambos mínimos, el cambio automático de temporada y el ciclo completo de las alertas.
 - Probar estados vacíos y uso en dispositivos móviles.
+- Confirmar que una cantidad idéntica registre el control sin generar un movimiento.
+- Verificar que el estado pendiente cambie al pasar la medianoche local y no a las veinticuatro horas del último control.
+- Probar intervalos mayores a un día, artículos sin control periódico y artículos nunca controlados.
+- Verificar el relleno inicial de la fecha de control tras ejecutar la migración sobre datos existentes.
 - Ejecutar el build de producción.
 - Confirmar que el menú QR y el flujo de pedidos existente continúen funcionando.

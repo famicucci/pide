@@ -82,14 +82,26 @@ CREATE TABLE IF NOT EXISTS `stock_items` (
   `current_quantity` DECIMAL(10,2) NOT NULL DEFAULT 0,
   `minimum_low_season` DECIMAL(10,2) NULL,
   `minimum_high_season` DECIMAL(10,2) NULL,
+  `control_interval_days` INT UNSIGNED NULL DEFAULT 1,
+  `last_controlled_at` TIMESTAMP NULL DEFAULT NULL,
+  `last_controlled_by` INT UNSIGNED NULL,
   `sort_order` INT NOT NULL DEFAULT 0,
   `active` TINYINT(1) NOT NULL DEFAULT 1,
   `created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   FOREIGN KEY (`category_id`) REFERENCES `stock_categories`(`id`) ON DELETE RESTRICT,
+  FOREIGN KEY (`last_controlled_by`) REFERENCES `users`(`id`) ON DELETE SET NULL,
   INDEX `idx_stock_items_category_active` (`category_id`, `active`),
-  INDEX `idx_stock_items_name_brand` (`name`, `brand`)
+  INDEX `idx_stock_items_name_brand` (`name`, `brand`),
+  INDEX `idx_stock_items_last_controlled` (`last_controlled_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+ALTER TABLE `stock_items`
+  ADD COLUMN IF NOT EXISTS `control_interval_days` INT UNSIGNED NULL DEFAULT 1;
+ALTER TABLE `stock_items`
+  ADD COLUMN IF NOT EXISTS `last_controlled_at` TIMESTAMP NULL DEFAULT NULL;
+ALTER TABLE `stock_items`
+  ADD COLUMN IF NOT EXISTS `last_controlled_by` INT UNSIGNED NULL;
 
 UPDATE `stock_items`
 SET `unit` = CASE `unit`
@@ -133,6 +145,58 @@ CREATE TABLE IF NOT EXISTS `stock_movements` (
 
 ALTER TABLE `stock_movements`
   DROP COLUMN IF EXISTS `notes`;
+
+UPDATE `stock_items` i
+SET
+  i.`last_controlled_at` = (
+    SELECT m.`created_at`
+    FROM `stock_movements` m
+    WHERE m.`stock_item_id` = i.`id`
+    ORDER BY m.`created_at` DESC, m.`id` DESC
+    LIMIT 1
+  ),
+  i.`last_controlled_by` = (
+    SELECT m.`user_id`
+    FROM `stock_movements` m
+    WHERE m.`stock_item_id` = i.`id`
+    ORDER BY m.`created_at` DESC, m.`id` DESC
+    LIMIT 1
+  )
+WHERE i.`last_controlled_at` IS NULL
+  AND EXISTS (
+    SELECT 1 FROM `stock_movements` m WHERE m.`stock_item_id` = i.`id`
+  );
+
+SET @add_last_controlled_fk = IF(
+  EXISTS(
+    SELECT 1
+    FROM information_schema.KEY_COLUMN_USAGE
+    WHERE TABLE_SCHEMA = DATABASE()
+      AND TABLE_NAME = 'stock_items'
+      AND COLUMN_NAME = 'last_controlled_by'
+      AND REFERENCED_TABLE_NAME = 'users'
+  ),
+  'SELECT 1',
+  'ALTER TABLE `stock_items` ADD CONSTRAINT `fk_stock_items_last_controlled_by` FOREIGN KEY (`last_controlled_by`) REFERENCES `users`(`id`) ON DELETE SET NULL'
+);
+PREPARE add_last_controlled_fk_stmt FROM @add_last_controlled_fk;
+EXECUTE add_last_controlled_fk_stmt;
+DEALLOCATE PREPARE add_last_controlled_fk_stmt;
+
+SET @add_last_controlled_index = IF(
+  EXISTS(
+    SELECT 1
+    FROM information_schema.STATISTICS
+    WHERE TABLE_SCHEMA = DATABASE()
+      AND TABLE_NAME = 'stock_items'
+      AND INDEX_NAME = 'idx_stock_items_last_controlled'
+  ),
+  'SELECT 1',
+  'CREATE INDEX `idx_stock_items_last_controlled` ON `stock_items` (`last_controlled_at`)'
+);
+PREPARE add_last_controlled_index_stmt FROM @add_last_controlled_index;
+EXECUTE add_last_controlled_index_stmt;
+DEALLOCATE PREPARE add_last_controlled_index_stmt;
 
 CREATE TABLE IF NOT EXISTS `stock_high_season_dates` (
   `season_date` DATE PRIMARY KEY,

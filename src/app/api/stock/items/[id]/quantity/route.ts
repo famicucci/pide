@@ -46,35 +46,40 @@ export async function PATCH(
 
     const previousQuantity = Number(item.current_quantity);
     const newQuantity = parsed.data.quantity;
-    if (previousQuantity === newQuantity) {
-      await connection.rollback();
-      return NextResponse.json({ ok: true, unchanged: true, quantity: newQuantity });
-    }
+    const unchanged = previousQuantity === newQuantity;
 
     const difference = Number((newQuantity - previousQuantity).toFixed(2));
     await connection.execute(
-      "UPDATE stock_items SET current_quantity = ? WHERE id = ?",
-      [newQuantity, itemId]
+      `UPDATE stock_items
+       SET current_quantity = ?, last_controlled_at = CURRENT_TIMESTAMP, last_controlled_by = ?
+       WHERE id = ?`,
+      [newQuantity, session.userId, itemId]
     );
-    await connection.execute(
-      `INSERT INTO stock_movements
-        (stock_item_id, movement_type, user_id, previous_quantity, new_quantity, difference)
-       VALUES (?, 'adjustment', ?, ?, ?, ?)`,
-      [
-        itemId,
-        session.userId,
-        previousQuantity,
-        newQuantity,
-        difference,
-      ]
-    );
+    if (!unchanged) {
+      await connection.execute(
+        `INSERT INTO stock_movements
+          (stock_item_id, movement_type, user_id, previous_quantity, new_quantity, difference)
+         VALUES (?, 'adjustment', ?, ?, ?, ?)`,
+        [
+          itemId,
+          session.userId,
+          previousQuantity,
+          newQuantity,
+          difference,
+        ]
+      );
+    }
 
     await connection.commit();
     return NextResponse.json({
       ok: true,
+      unchanged,
       previous_quantity: previousQuantity,
       quantity: newQuantity,
       difference,
+      last_controlled_at: new Date().toISOString(),
+      last_controlled_by: session.userId,
+      last_controlled_by_name: session.name,
     });
   } catch (error) {
     await connection.rollback();
