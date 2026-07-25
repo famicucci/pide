@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { CheckCircle2, PackageOpen, Printer, Search, TriangleAlert } from "lucide-react";
+import { CheckCircle2, PackageOpen, Printer, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -84,16 +84,16 @@ export default function StockAlertsPage() {
         ) : (
           <>
             <div className="mb-5 flex items-center justify-between gap-4 px-1">
-              <div className="flex items-center gap-3">
-                <TriangleAlert className="h-6 w-6 shrink-0 text-amber-700" />
-                <div>
-                  <h2 className="text-xl font-extrabold tracking-tight">
-                    {data.count} {data.count === 1 ? "artículo" : "artículos"}
-                  </h2>
-                  <p className="text-sm text-muted-foreground">
-                    Mínimos de temporada {data.season === "high" ? "alta" : "baja"}.
-                  </p>
-                </div>
+              <div className="flex items-center gap-2">
+                <h2 className="text-xl font-extrabold tracking-tight">Stock bajo</h2>
+                <span
+                  aria-label={`${data.count} ${
+                    data.count === 1 ? "artículo con stock bajo" : "artículos con stock bajo"
+                  }`}
+                  className="flex h-7 min-w-7 items-center justify-center rounded-full bg-amber-100 px-2 text-sm font-bold text-amber-900"
+                >
+                  {data.count}
+                </span>
               </div>
               <Button
                 variant="outline"
